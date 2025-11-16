@@ -93,6 +93,7 @@ export const Login: React.FC = () => {
     }
 
     try {
+<<<<<<< HEAD
       // Llamar al servicio de autenticación
       await authService.login(formData.email, formData.password);
       
@@ -130,6 +131,41 @@ export const Login: React.FC = () => {
       }
       
       setError(errorMessage);
+=======
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          correo: formData.email,
+          contrasena: formData.password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error en el inicio de sesión');
+      }
+
+      const data = await response.json();
+
+      // Guardar el token y datos del usuario en localStorage
+      if (data.data) {
+        localStorage.setItem('auth_token', data.data.accessToken);
+        localStorage.setItem('refresh_token', data.data.refreshToken);
+        localStorage.setItem('user_data', JSON.stringify({
+          correo: data.data.correo,
+          nombre: data.data.nombre,
+          rol: data.data.rol
+        }));
+      }
+
+      // Redirigir al dashboard después del inicio de sesión exitoso
+      navigate(ROUTES.DASHBOARD);
+    } catch (err: any) {
+      setError(err.message || 'Credenciales inválidas. Por favor, inténtalo de nuevo.');
+>>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
       console.error('Error en el inicio de sesión:', err);
     } finally {
       setLoading(false);

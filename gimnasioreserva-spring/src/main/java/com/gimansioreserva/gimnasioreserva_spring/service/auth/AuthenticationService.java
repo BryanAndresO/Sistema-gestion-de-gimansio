@@ -66,7 +66,7 @@ public class AuthenticationService {
         usuario.setNombre(request.getNombre());
         usuario.setCorreo(request.getCorreo());
         usuario.setContrasena(passwordEncoder.encode(request.getContrasena()));
-        usuario.setRol(request.getRol() != null ? request.getRol() : "USER");
+        usuario.setRol("USER");
         usuario.setActivo(true);
 
         return usuarioRepository.save(usuario);

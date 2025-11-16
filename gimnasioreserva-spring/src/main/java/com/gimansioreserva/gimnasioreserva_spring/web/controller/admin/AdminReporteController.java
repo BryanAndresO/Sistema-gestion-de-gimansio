@@ -11,7 +11,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/reportes")
-@CrossOrigin(origins = "*")
 public class AdminReporteController {
 
     private final AdminReporteService adminReporteService;

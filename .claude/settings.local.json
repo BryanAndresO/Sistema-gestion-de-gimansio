@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(find:*)",
+      "Bash(./gradlew compileJava:*)",
+      "Bash(./gradlew run:*)",
+      "Bash(java:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(mysql:*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"INSERT INTO usuarios (nombre, correo, contrasena, rol, activo) VALUES (''Administrador'', ''admin@gimnasio.com'', ''$2a$10$J5Nc37ardDKvwEk4vCxQvOikHdY0NXvgXid2Nh3/x9X.n/QEvkvaq'', ''ADMIN'', true);\" gimnasio_reserva)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"UPDATE usuarios SET contrasena = ''$2a$10$J5Nc37ardDKvwEk4vCxQvOikHdY0NXvgXid2Nh3/x9X.n/QEvkvaq'', rol = ''ADMIN'' WHERE correo = ''admin@gimnasio.com'';\" gimnasio_reserva)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"SELECT id_usuario, nombre, correo, rol, activo FROM usuarios WHERE correo = ''admin@gimnasio.com'';\" gimnasio_reserva)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

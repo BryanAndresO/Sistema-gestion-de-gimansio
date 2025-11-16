@@ -156,6 +156,7 @@ export const Register: React.FC = () => {
     }
 
     try {
+<<<<<<< HEAD
       // Llamar al servicio de autenticación para registrar al usuario
       await authService.register({
         nombre: formData.nombre,
@@ -199,6 +200,29 @@ export const Register: React.FC = () => {
       }
       
       setError(errorMessage);
+=======
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          correo: formData.email,
+          contrasena: formData.password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error en el registro');
+      }
+      
+      // Redirigir al dashboard después del registro exitoso
+      navigate(ROUTES.DASHBOARD);
+    } catch (err: any) {
+      setError(err.message || 'Error al registrar el usuario. Por favor, inténtalo de nuevo.');
+>>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
       console.error('Error en el registro:', err);
     } finally {
       setLoading(false);

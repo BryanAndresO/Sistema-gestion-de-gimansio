@@ -2,12 +2,25 @@
 
 /**
  * Obtiene un valor del localStorage de forma segura
+ * Maneja tanto strings planos (como JWT tokens) como objetos JSON
  */
 export const getFromStorage = <T>(key: string, defaultValue: T | null = null): T | null => {
   try {
     const item = localStorage.getItem(key);
     if (item === null) return defaultValue;
-    return JSON.parse(item) as T;
+
+    // Si el item comienza con '{' o '[', probablemente es JSON
+    if (item.startsWith('{') || item.startsWith('[')) {
+      try {
+        return JSON.parse(item) as T;
+      } catch {
+        // Si falla el parsing, devolver el string tal cual
+        return item as T;
+      }
+    }
+
+    // Para JWT tokens y otros strings planos, devolver directamente
+    return item as T;
   } catch (error) {
     console.error(`Error reading from localStorage key "${key}":`, error);
     return defaultValue;

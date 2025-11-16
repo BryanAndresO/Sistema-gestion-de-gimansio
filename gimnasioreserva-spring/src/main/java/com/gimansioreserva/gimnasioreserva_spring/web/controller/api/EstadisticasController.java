@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/estadisticas")
-@CrossOrigin(origins = "*")
 public class EstadisticasController {
 
     private final EstadisticasService estadisticasService;

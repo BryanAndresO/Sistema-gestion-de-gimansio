@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/clases")
-@CrossOrigin(origins = "*")
 public class AdminClaseController {
 
     private final AdminClaseService adminClaseService;

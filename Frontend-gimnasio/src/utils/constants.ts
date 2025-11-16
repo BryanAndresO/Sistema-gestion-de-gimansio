@@ -28,9 +28,20 @@ export const ROUTES = {
   NUEVA_RESERVA: '/reservas/nueva',
   NUEVA_RESERVA_ADMIN: '/reservas/nueva-admin',
   HISTORIAL_RESERVAS: '/reservas/historial',
+<<<<<<< HEAD
   ADMIN_CREAR_USUARIO: '/admin/crear-usuario',
   ADMIN_GESTIONAR_CLASES: '/admin/clases',
   ADMIN_GESTIONAR_ENTRENADORES: '/admin/entrenadores',
+=======
+  // Rutas de Admin
+  ADMIN_DASHBOARD: '/admin',
+  ADMIN_USUARIOS: '/admin/usuarios',
+  ADMIN_CLASES: '/admin/clases',
+  ADMIN_ENTRENADORES: '/admin/entrenadores',
+  ADMIN_RESERVAS: '/admin/reservas',
+  ADMIN_REPORTES: '/admin/reportes',
+  ADMIN_CONFIGURACION: '/admin/configuracion',
+>>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
 } as const;
 
 export const USER_ROLES = {
