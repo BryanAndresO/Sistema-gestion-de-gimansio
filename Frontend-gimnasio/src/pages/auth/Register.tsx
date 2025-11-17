@@ -6,6 +6,7 @@ import { Input } from '../../components/common/Input';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { authService } from '../../services/core/authService';
 import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 interface FieldErrors {
   nombre?: string;
@@ -27,7 +28,8 @@ export const Register: React.FC = () => {
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let { name, value } = e.target;
+    const { name } = e.target;
+    let { value } = e.target;
 
     if (name === 'nombre') {
       value = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
@@ -121,10 +123,11 @@ export const Register: React.FC = () => {
 
       toast.success('¡Cuenta creada con éxito! Por favor inicia sesión.');
       navigate(ROUTES.LOGIN);
-    } catch (err: any) {
+    } catch (err) {
+      const axiosError = err as AxiosError;
       let errorMessage = 'No se pudo completar el registro. Intenta de nuevo.';
-      if (err.response) {
-        if (err.response.status === 409) {
+      if (axiosError.response) {
+        if (axiosError.response.status === 409) {
           errorMessage = 'Este correo electrónico ya está registrado. ¿Olvidaste tu contraseña?';
         }
       }

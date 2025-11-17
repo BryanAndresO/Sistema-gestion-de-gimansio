@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import type { ClaseDTO } from '../../services/core/claseService';
 import { claseService } from '../../services/core/claseService';
@@ -13,8 +13,14 @@ import { reservaService } from '../../services/core/reservaService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { formatDateTime } from '../../utils/formatters';
-import { Toast } from '../../components/common/Toast';
-import type { ToastType } from '../../components/common/Toast';
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
+
+interface User {
+  idUsuario: number;
+  nombre: string;
+  rol: string;
+}
 
 export const DetalleClase: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,31 +29,27 @@ export const DetalleClase: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [reservando, setReservando] = useState(false);
-  const [user] = useLocalStorage<any>(STORAGE_KEYS.USER, null);
-  const [toast, setToast] = useState<{ message: string; type: ToastType; visible: boolean }>({
-    message: '',
-    type: 'info',
-    visible: false,
-  });
+  const [user] = useLocalStorage<User | null>(STORAGE_KEYS.USER, null);
 
-  useEffect(() => {
-    if (id) {
-      cargarClase();
-    }
-  }, [id]);
-
-  const cargarClase = async () => {
+  const cargarClase = useCallback(async () => {
     try {
       setLoading(true);
       const data = await claseService.obtenerPorId(Number(id));
       setClase(data);
     } catch (error) {
-      mostrarToast('Error al cargar la clase', 'error');
+      console.error('Error al cargar la clase:', error);
+      toast.error('Error al cargar la clase');
       navigate('/clases');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
+
+  useEffect(() => {
+    if (id) {
+      cargarClase();
+    }
+  }, [id, cargarClase]);
 
   const handleReservar = () => {
     if (clase) {
@@ -61,19 +63,15 @@ export const DetalleClase: React.FC = () => {
     try {
       setReservando(true);
       await reservaService.crearReserva(user.idUsuario, clase.idClase);
-      mostrarToast('Reserva confirmada exitosamente', 'success');
+      toast.success('Reserva confirmada exitosamente');
       setShowConfirmModal(false);
       setTimeout(() => navigate('/reservas'), 1500);
-    } catch (error: any) {
-      mostrarToast(error.response?.data?.message || 'Error al crear la reserva', 'error');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || 'Error al crear la reserva');
     } finally {
       setReservando(false);
     }
-  };
-
-  const mostrarToast = (message: string, type: ToastType) => {
-    setToast({ message, type, visible: true });
-    setTimeout(() => setToast({ ...toast, visible: false }), 3000);
   };
 
   if (loading) {
@@ -168,13 +166,6 @@ export const DetalleClase: React.FC = () => {
         onConfirm={confirmarReserva}
         onCancel={() => setShowConfirmModal(false)}
         isLoading={reservando}
-      />
-
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.visible}
-        onClose={() => setToast({ ...toast, visible: false })}
       />
     </>
   );

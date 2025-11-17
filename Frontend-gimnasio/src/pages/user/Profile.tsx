@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card } from '../../components/common/Card';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Loading } from '../../components/common/Loading';
 import { usuarioService } from '../../services/core/usuarioService';
-import { authService } from '../../services/core/authService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { toast } from 'react-toastify';
 
+interface User {
+  idUsuario: number;
+  nombre: string;
+  email: string;
+  rol: string;
+}
+
 export const Profile: React.FC = () => {
-  const [user] = useLocalStorage<any>(STORAGE_KEYS.USER, null);
+  const [user, setUser] = useLocalStorage<User | null>(STORAGE_KEYS.USER, null);
   const [formData, setFormData] = useState({
     nombre: '',
     correo: '',
@@ -21,11 +27,7 @@ export const Profile: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
 
-  useEffect(() => {
-    cargarPerfil();
-  }, [user]);
-
-  const cargarPerfil = async () => {
+  const cargarPerfil = useCallback(async () => {
     if (!user?.email) {
       setLoading(false);
       return;
@@ -48,7 +50,11 @@ export const Profile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    cargarPerfil();
+  }, [cargarPerfil]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -85,7 +91,7 @@ export const Profile: React.FC = () => {
         nombre: usuarioActualizado.nombre,
         email: usuarioActualizado.correo,
       };
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+      setUser(updatedUser as User);
     } catch (error) {
       console.error('Error al actualizar perfil:', error);
     } finally {

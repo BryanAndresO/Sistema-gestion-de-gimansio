@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from '../services/core/axiosConfig';
 import { AxiosError } from 'axios';
 
@@ -32,64 +32,62 @@ export const useApi = <T = unknown>(
 
   const { skip = false, method, headers, params, data } = options;
 
+  const fetchData = useCallback(async (isCancelled: { value: boolean }) => {
+    if (isCancelled.value) return;
+
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const response = await axios({
+        method: method || 'GET',
+        url: url.startsWith('/') ? url : `/${url}`,
+        headers,
+        params,
+        data,
+        withCredentials: true,
+      });
+
+      if (isCancelled.value) return;
+
+      console.log('API Response:', response.data);
+      console.log('Response type:', typeof response.data);
+      console.log('Is array?', Array.isArray(response.data));
+
+      setState({
+        data: response.data,
+        loading: false,
+        error: null,
+      });
+    } catch (error) {
+      if (isCancelled.value) return;
+
+      const axiosError = error as AxiosError<ErrorResponse>;
+      const errorMessage =
+        axiosError.response?.data?.message ||
+        axiosError.message ||
+        'Error desconocido';
+
+      setState({
+        data: null,
+        loading: false,
+        error: errorMessage,
+      });
+    }
+  }, [url, method, headers, params, data]);
+
   useEffect(() => {
     if (skip) return;
 
-    let cancelled = false;
-
-    const fetchData = async () => {
-      if (cancelled) return;
-
-      setState(prev => ({ ...prev, loading: true, error: null }));
-
-      try {
-        // El token se agregará automáticamente por el interceptor de axios
-        const response = await axios({
-          method: method || 'GET',
-          url: url.startsWith('/') ? url : `/${url}`,
-          headers,
-          params,
-          data,
-          withCredentials: true, // Asegurar que withCredentials esté configurado
-        });
-
-        if (cancelled) return;
-
-        console.log('API Response:', response.data);
-        console.log('Response type:', typeof response.data);
-        console.log('Is array?', Array.isArray(response.data));
-
-        setState({
-          data: response.data,
-          loading: false,
-          error: null,
-        });
-      } catch (error) {
-        if (cancelled) return;
-
-        const axiosError = error as AxiosError<ErrorResponse>;
-        const errorMessage =
-          axiosError.response?.data?.message ||
-          axiosError.message ||
-          'Error desconocido';
-
-        setState({
-          data: null,
-          loading: false,
-          error: errorMessage,
-        });
-      }
-    };
-
-    fetchData();
+    const isCancelled = { value: false };
+    fetchData(isCancelled);
 
     return () => {
-      cancelled = true;
+      isCancelled.value = true;
     };
-  }, [url, skip, method, headers, params, data]);
+  }, [skip, fetchData]);
 
   const refetch = useCallback(() => {
-    fetchData();
+    fetchData({ value: false });
   }, [fetchData]);
 
   return { ...state, refetch };

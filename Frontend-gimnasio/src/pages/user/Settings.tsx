@@ -3,7 +3,6 @@ import { Card } from '../../components/common/Card';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { Button } from '../../components/common/Button';
 import { usuarioService } from '../../services/core/usuarioService';
-import { toast } from 'react-toastify';
 
 export const Settings: React.FC = () => {
   const [settings, setSettings] = useState({

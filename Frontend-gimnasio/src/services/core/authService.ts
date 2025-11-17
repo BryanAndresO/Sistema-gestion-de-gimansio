@@ -1,5 +1,4 @@
-import axios from './axiosConfig';
-import { API_BASE_URL } from '../../utils/constants';
+import axios, { AxiosError } from 'axios';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { toast } from 'react-toastify';
 
@@ -22,6 +21,14 @@ interface RegisterData {
   genero?: string;
 }
 
+interface User {
+  idUsuario: number;
+  email: string;
+  correo: string;
+  nombre: string;
+  rol: string;
+}
+
 export const authService = {
   // Login de usuario
   login: async (email: string, password: string): Promise<LoginResponse> => {
@@ -41,7 +48,7 @@ export const authService = {
         localStorage.setItem(STORAGE_KEYS.TOKEN, responseData.accessToken);
 
         // Guardar información del usuario (como JSON)
-        const user = {
+        const user: User = {
           idUsuario: responseData.idUsuario,
           email: responseData.correo,
           correo: responseData.correo,
@@ -63,8 +70,9 @@ export const authService = {
       }
       
       throw new Error('No se recibió un token válido');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error en el inicio de sesión';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error en el inicio de sesión';
       toast.error(errorMessage);
       throw error;
     }
@@ -81,8 +89,9 @@ export const authService = {
         // El rol es opcional, el backend asignará 'USER' por defecto
       });
       // No mostrar toast aquí, se mostrará en el componente
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error en el registro';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error en el registro';
       toast.error(errorMessage);
       throw error;
     }
@@ -107,7 +116,7 @@ export const authService = {
   },
 
   // Obtener información del usuario actual
-  getCurrentUser: (): any => {
+  getCurrentUser: (): User | null => {
     const user = localStorage.getItem(STORAGE_KEYS.USER);
     return user ? JSON.parse(user) : null;
   },

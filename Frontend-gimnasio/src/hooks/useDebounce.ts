@@ -22,21 +22,31 @@ export const useDebounce = <T>(value: T, delay: number = 500): T => {
 /**
  * Hook para debounce de una función
  */
-export const useDebouncedCallback = <T extends (...args: any[]) => any>(
-  callback: T,
+export const useDebouncedCallback = <A extends any[], R>(
+  callback: (...args: A) => R,
   delay: number = 500
-): T => {
-  const [debouncedCallback, setDebouncedCallback] = useState<T>(callback);
+): ((...args: A) => void) => {
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedCallback(() => callback);
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [timeoutId]);
+
+  const debouncedCallback = (...args: A) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    const newTimeoutId = setTimeout(() => {
+      callback(...args);
     }, delay);
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [callback, delay]);
+    setTimeoutId(newTimeoutId);
+  };
 
   return debouncedCallback;
 };

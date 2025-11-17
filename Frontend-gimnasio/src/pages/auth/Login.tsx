@@ -6,6 +6,7 @@ import { Input } from '../../components/common/Input';
 import { MainLayout } from '../../components/layout/MainLayout';
 import { authService } from '../../services/core/authService';
 import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 interface FieldErrors {
   correo?: string;
@@ -39,14 +40,16 @@ export const Login: React.FC = () => {
 
   const validateField = (name: string, value: string): string | null => {
     switch (name) {
-      case 'email':
+      case 'email': {
         if (!value.trim()) return 'El correo electrónico es obligatorio';
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) return 'El correo debe tener un formato válido (ejemplo: usuario@dominio.com)';
         return null;
-      case 'password':
+      }
+      case 'password': {
         if (!value) return 'La contraseña es obligatoria';
         return null;
+      }
       default:
         return null;
     }
@@ -86,26 +89,27 @@ export const Login: React.FC = () => {
       await authService.login(formData.email, formData.password);
       toast.success('¡Bienvenido de nuevo!');
       navigate(ROUTES.DASHBOARD);
-    } catch (err: any) {
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message: string; errors: FieldErrors }>;
       let errorMessage = 'No se pudo iniciar sesión. Intenta de nuevo.';
-      if (err.response) {
-        if (err.response.status === 401) {
+      if (axiosError.response) {
+        if (axiosError.response.status === 401) {
           errorMessage = 'Correo o contraseña incorrectos';
-        } else if (err.response.status === 400) {
-          if (err.response.data?.errors) {
-            setFieldErrors(err.response.data.errors);
+        } else if (axiosError.response.status === 400) {
+          if (axiosError.response.data?.errors) {
+            setFieldErrors(axiosError.response.data.errors);
             errorMessage = 'Por favor, corrige los errores en el formulario';
-          } else if (err.response.data?.message) {
-            errorMessage = err.response.data.message;
+          } else if (axiosError.response.data?.message) {
+            errorMessage = axiosError.response.data.message;
           }
-        } else if (err.response.status === 0) {
+        } else if (axiosError.response.status === 0) {
           errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
-        } else if (err.response.status >= 500) {
+        } else if (axiosError.response.status >= 500) {
           errorMessage = 'Error en el servidor. Por favor, inténtalo más tarde.';
-        } else if (err.response.data?.message) {
-          errorMessage = err.response.data.message;
+        } else if (axiosError.response.data?.message) {
+          errorMessage = axiosError.response.data.message;
         }
-      } else if (err.request) {
+      } else if (axiosError.request) {
         errorMessage = 'No se recibió respuesta del servidor. Verifica tu conexión.';
       }
       setError(errorMessage);

@@ -1,4 +1,4 @@
-import axios from './axiosConfig';
+import axios, { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 
 export interface EntrenadorAdminDTO {
@@ -54,8 +54,9 @@ export const adminEntrenadorService = {
       const response = await axios.post('/admin/entrenadores', datos);
       toast.success('Entrenador creado correctamente');
       return response.data.data || response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al crear el entrenador';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al crear el entrenador';
       toast.error(errorMessage);
       throw error;
     }
@@ -67,8 +68,9 @@ export const adminEntrenadorService = {
       const response = await axios.put(`/admin/entrenadores/${id}`, datos);
       toast.success('Entrenador actualizado correctamente');
       return response.data.data || response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al actualizar el entrenador';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al actualizar el entrenador';
       toast.error(errorMessage);
       throw error;
     }
@@ -79,8 +81,9 @@ export const adminEntrenadorService = {
     try {
       await axios.delete(`/admin/entrenadores/${id}`);
       toast.success('Entrenador eliminado correctamente');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al eliminar el entrenador';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al eliminar el entrenador';
       toast.error(errorMessage);
       throw error;
     }
@@ -114,8 +117,9 @@ export const adminEntrenadorService = {
       const response = await axios.patch(`/admin/entrenadores/${id}/toggle-estado`);
       toast.success('Estado del entrenador actualizado');
       return response.data.data || response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al cambiar el estado del entrenador';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al cambiar el estado del entrenador';
       toast.error(errorMessage);
       throw error;
     }
@@ -126,8 +130,9 @@ export const adminEntrenadorService = {
     try {
       await axios.patch(`/admin/entrenadores/${id}/desactivar`);
       toast.success('Entrenador desactivado exitosamente');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al desactivar el entrenador';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al desactivar el entrenador';
       toast.error(errorMessage);
       throw error;
     }
@@ -138,8 +143,9 @@ export const adminEntrenadorService = {
     try {
       await axios.patch(`/admin/entrenadores/${id}/activar`);
       toast.success('Entrenador activado exitosamente');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al activar el entrenador';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al activar el entrenador';
       toast.error(errorMessage);
       throw error;
     }

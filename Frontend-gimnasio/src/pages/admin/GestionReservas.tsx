@@ -86,7 +86,7 @@ export const GestionReservas: React.FC = () => {
     {
       key: 'acciones',
       header: 'Acciones',
-      render: (_: any, row: Reserva) => (
+      render: (_: unknown, row: Reserva) => (
         <div className="flex gap-2">
           {row.estado === 'PENDIENTE' && (
             <>

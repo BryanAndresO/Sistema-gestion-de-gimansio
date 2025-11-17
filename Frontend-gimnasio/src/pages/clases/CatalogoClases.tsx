@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { ClaseCard } from '../../components/clases/ClaseCard';
 import { ClaseFiltros } from '../../components/clases/ClaseFiltros';
@@ -11,8 +11,15 @@ import { ReservaConfirmModal } from '../../components/reservas/ReservaConfirmMod
 import { reservaService } from '../../services/core/reservaService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/constants';
-import { Toast } from '../../components/common/Toast';
-import type { ToastType } from '../../components/common/Toast';
+import { toast } from 'react-toastify';
+import type { TypeOptions } from 'react-toastify';
+import { AxiosError } from 'axios';
+
+interface User {
+  idUsuario: number;
+  nombre: string;
+  rol: string;
+}
 
 export const CatalogoClases: React.FC = () => {
   const [clases, setClases] = useState<ClaseDTO[]>([]);
@@ -21,45 +28,40 @@ export const CatalogoClases: React.FC = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [reservando, setReservando] = useState(false);
   const [reservasUsuario, setReservasUsuario] = useState<number[]>([]);
-  const [toast, setToast] = useState<{ message: string; type: ToastType; visible: boolean }>({
-    message: '',
-    type: 'info',
-    visible: false,
-  });
-  const [user] = useLocalStorage<any>(STORAGE_KEYS.USER, null);
+  const [user] = useLocalStorage<User | null>(STORAGE_KEYS.USER, null);
 
-  useEffect(() => {
-    cargarClases();
-    if (user?.idUsuario) {
-      cargarReservasUsuario();
-    }
-  }, [user]);
-
-  const cargarClases = async () => {
-    try {
-      setLoading(true);
-      const data = await claseService.obtenerClasesDisponibles();
-      setClases(Array.isArray(data) ? data : []);
-    } catch (error) {
-      mostrarToast('Error al cargar las clases', 'error');
-      setClases([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cargarReservasUsuario = async () => {
+  const cargarReservasUsuario = useCallback(async () => {
     try {
       if (!user?.idUsuario) return;
       const reservas = await reservaService.obtenerReservasConfirmadas(user.idUsuario);
-      // Extraer los IDs de las clases que ya tienen reserva
       const idsClasesReservadas = reservas.map(reserva => reserva.idClase);
       setReservasUsuario(idsClasesReservadas);
     } catch (error) {
       console.error('Error al cargar reservas del usuario:', error);
       setReservasUsuario([]);
     }
-  };
+  }, [user]);
+
+  const cargarClases = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await claseService.obtenerClasesDisponibles();
+      setClases(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error al cargar las clases:', error);
+      toast.error('Error al cargar las clases');
+      setClases([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarClases();
+    if (user?.idUsuario) {
+      cargarReservasUsuario();
+    }
+  }, [user, cargarClases, cargarReservasUsuario]);
 
   const handleFiltrar = async (filtros: FiltrosClase) => {
     try {
@@ -76,7 +78,8 @@ export const CatalogoClases: React.FC = () => {
       
       setClases(Array.isArray(data) ? data : []);
     } catch (error) {
-      mostrarToast('Error al filtrar las clases', 'error');
+      console.error('Error al filtrar las clases:', error);
+      toast.error('Error al filtrar las clases');
       setClases([]);
     } finally {
       setLoading(false);
@@ -97,21 +100,17 @@ export const CatalogoClases: React.FC = () => {
     try {
       setReservando(true);
       await reservaService.crearReserva(user.idUsuario, claseSeleccionada.idClase);
-      mostrarToast('Reserva confirmada exitosamente', 'success');
+      toast.success('Reserva confirmada exitosamente');
       setShowConfirmModal(false);
       setClaseSeleccionada(null);
       cargarClases(); // Recargar para actualizar cupos
       cargarReservasUsuario(); // Recargar reservas del usuario
-    } catch (error: any) {
-      mostrarToast(error.response?.data?.message || 'Error al crear la reserva', 'error');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || 'Error al crear la reserva');
     } finally {
       setReservando(false);
     }
-  };
-
-  const mostrarToast = (message: string, type: ToastType) => {
-    setToast({ message, type, visible: true });
-    setTimeout(() => setToast({ ...toast, visible: false }), 3000);
   };
 
   return (
@@ -150,13 +149,6 @@ export const CatalogoClases: React.FC = () => {
           setClaseSeleccionada(null);
         }}
         isLoading={reservando}
-      />
-
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.visible}
-        onClose={() => setToast({ ...toast, visible: false })}
       />
     </>
   );

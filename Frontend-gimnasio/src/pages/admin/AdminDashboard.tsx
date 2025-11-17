@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Card } from '../../components/common/Card';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { useApi } from '../../hooks/useApi';
@@ -12,16 +12,19 @@ interface ReporteGeneral {
   clasesActivas: number;
 }
 
-export const AdminDashboard: React.FC = () => {
-  const [userData, setUserData] = useState<any>(null);
-  const { data: reporteData, loading, error } = useApi<ReporteGeneral>('/admin/reportes/general');
+interface UserData {
+  nombre: string;
+}
 
-  useEffect(() => {
+export const AdminDashboard: React.FC = () => {
+  const [userData] = useState<UserData | null>(() => {
     const userDataStr = localStorage.getItem('user_data');
     if (userDataStr) {
-      setUserData(JSON.parse(userDataStr));
+      return JSON.parse(userDataStr);
     }
-  }, []);
+    return null;
+  });
+  const { data: reporteData, loading, error } = useApi<ReporteGeneral>('/admin/reportes/general');
 
   const reporte = reporteData;
 

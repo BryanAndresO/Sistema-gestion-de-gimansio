@@ -53,6 +53,7 @@ export const GestionarClases: React.FC = () => {
       setClases(clasesData);
       setEntrenadores(entrenadoresData);
     } catch (error) {
+      console.error('Error al cargar los datos:', error);
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);

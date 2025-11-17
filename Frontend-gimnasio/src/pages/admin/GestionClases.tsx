@@ -19,6 +19,11 @@ interface Clase {
   activo: boolean;
 }
 
+interface Entrenador {
+  idEntrenador: number;
+  nombre: string;
+}
+
 export const GestionClases: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClase, setEditingClase] = useState<Clase | null>(null);
@@ -43,7 +48,7 @@ export const GestionClases: React.FC = () => {
   ];
 
   const { data: clasesData, loading, refetch } = useApi<Clase[]>('/admin/clases');
-  const { data: entrenadoresData } = useApi<any[]>('/admin/entrenadores');
+  const { data: entrenadoresData } = useApi<Entrenador[]>('/admin/entrenadores');
   const { mutate: createClase, loading: creating } = useApiMutation();
   const { mutate: updateClase, loading: updating } = useApiMutation();
   const { mutate: deleteClase, loading: deleting } = useApiMutation();
@@ -140,7 +145,7 @@ export const GestionClases: React.FC = () => {
     {
       key: 'acciones',
       header: 'Acciones',
-      render: (_: any, row: Clase) => (
+      render: (_: unknown, row: Clase) => (
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" onClick={() => handleOpenModal(row)}>
             Editar

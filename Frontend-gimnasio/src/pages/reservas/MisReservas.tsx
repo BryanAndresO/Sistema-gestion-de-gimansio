@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { ReservaCard } from '../../components/reservas/ReservaCard';
 import { ReservaCancelModal } from '../../components/reservas/ReservaCancelModal';
@@ -8,9 +8,15 @@ import type { ReservaDTO } from '../../services/core/reservaService';
 import { reservaService } from '../../services/core/reservaService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/constants';
-import { Toast } from '../../components/common/Toast';
-import type { ToastType } from '../../components/common/Toast';
+import { toast } from 'react-toastify';
 import { Button } from '../../components/common/Button';
+import { AxiosError } from 'axios';
+
+interface User {
+  idUsuario: number;
+  nombre: string;
+  rol: string;
+}
 
 export const MisReservas: React.FC = () => {
   const [reservas, setReservas] = useState<ReservaDTO[]>([]);
@@ -18,31 +24,27 @@ export const MisReservas: React.FC = () => {
   const [reservaACancelar, setReservaACancelar] = useState<ReservaDTO | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelando, setCancelando] = useState(false);
-  const [user] = useLocalStorage<any>(STORAGE_KEYS.USER, null);
-  const [toast, setToast] = useState<{ message: string; type: ToastType; visible: boolean }>({
-    message: '',
-    type: 'info',
-    visible: false,
-  });
+  const [user] = useLocalStorage<User | null>(STORAGE_KEYS.USER, null);
 
-  useEffect(() => {
-    if (user?.idUsuario) {
-      cargarReservas();
-    }
-  }, [user]);
-
-  const cargarReservas = async () => {
+  const cargarReservas = useCallback(async () => {
     try {
       setLoading(true);
       const data = await reservaService.obtenerReservasConfirmadas(Number(user?.idUsuario));
       setReservas(Array.isArray(data) ? data : []);
     } catch (error) {
-      mostrarToast('Error al cargar las reservas', 'error');
+      console.error('Error al cargar las reservas:', error);
+      toast.error('Error al cargar las reservas');
       setReservas([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.idUsuario) {
+      cargarReservas();
+    }
+  }, [user, cargarReservas]);
 
   const handleCancelar = (idReserva: number) => {
     const reserva = reservas.find(r => r.idReserva === idReserva);
@@ -58,20 +60,16 @@ export const MisReservas: React.FC = () => {
     try {
       setCancelando(true);
       await reservaService.cancelarReserva(reservaACancelar.idReserva, Number(user.idUsuario));
-      mostrarToast('Reserva cancelada exitosamente', 'success');
+      toast.success('Reserva cancelada exitosamente');
       setShowCancelModal(false);
       setReservaACancelar(null);
       cargarReservas();
-    } catch (error: any) {
-      mostrarToast(error.response?.data?.message || 'Error al cancelar la reserva', 'error');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || 'Error al cancelar la reserva');
     } finally {
       setCancelando(false);
     }
-  };
-
-  const mostrarToast = (message: string, type: ToastType) => {
-    setToast({ message, type, visible: true });
-    setTimeout(() => setToast({ ...toast, visible: false }), 3000);
   };
 
   return (
@@ -115,13 +113,6 @@ export const MisReservas: React.FC = () => {
           setReservaACancelar(null);
         }}
         isLoading={cancelando}
-      />
-
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.visible}
-        onClose={() => setToast({ ...toast, visible: false })}
       />
     </>
   );

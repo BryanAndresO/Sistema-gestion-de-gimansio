@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { ReservaTimeline } from '../../components/reservas/ReservaTimeline';
 import { Loading } from '../../components/common/Loading';
@@ -8,18 +8,16 @@ import { reservaService } from '../../services/core/reservaService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/constants';
 
+interface User {
+  idUsuario: number;
+}
+
 export const HistorialReservas: React.FC = () => {
   const [reservas, setReservas] = useState<ReservaDTO[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user] = useLocalStorage<any>(STORAGE_KEYS.USER, null);
+  const [user] = useLocalStorage<User | null>(STORAGE_KEYS.USER, null);
 
-  useEffect(() => {
-    if (user?.idUsuario) {
-      cargarHistorial();
-    }
-  }, [user]);
-
-  const cargarHistorial = async () => {
+  const cargarHistorial = useCallback(async () => {
     try {
       setLoading(true);
       const data = await reservaService.obtenerHistorial(Number(user?.idUsuario));
@@ -30,7 +28,13 @@ export const HistorialReservas: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.idUsuario) {
+      cargarHistorial();
+    }
+  }, [user, cargarHistorial]);
 
   return (
     <>

@@ -129,7 +129,7 @@ export const GestionEntrenadores: React.FC = () => {
     {
       key: 'acciones',
       header: 'Acciones',
-      render: (_: any, row: Entrenador) => (
+      render: (_: unknown, row: Entrenador) => (
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" onClick={() => handleOpenModal(row)}>
             Editar

@@ -1,5 +1,4 @@
 import axios from './axiosConfig';
-import { API_BASE_URL } from '../../utils/constants';
 
 export interface DisponibilidadDTO {
   idClase: number;

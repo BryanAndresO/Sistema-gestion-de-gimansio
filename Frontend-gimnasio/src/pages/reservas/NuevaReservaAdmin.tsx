@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Loading } from '../../components/common/Loading';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -16,6 +15,7 @@ import { usuarioService } from '../../services/core/usuarioService';
 import { usePermissions } from '../../hooks/usePermissions';
 import { ROUTES } from '../../utils/constants';
 import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 export const NuevaReservaAdmin: React.FC = () => {
   const navigate = useNavigate();
@@ -52,6 +52,7 @@ export const NuevaReservaAdmin: React.FC = () => {
       setUsuarios(usuariosArray);
       setUsuariosFiltrados(usuariosArray);
     } catch (error) {
+      console.error('Error al cargar los datos:', error);
       toast.error('Error al cargar los datos');
       setUsuarios([]);
       setUsuariosFiltrados([]);
@@ -108,8 +109,9 @@ export const NuevaReservaAdmin: React.FC = () => {
       setClaseSeleccionada(null);
       // Recargar clases para actualizar disponibilidad
       cargarDatos();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error al crear la reserva');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || 'Error al crear la reserva');
     } finally {
       setReservando(false);
     }

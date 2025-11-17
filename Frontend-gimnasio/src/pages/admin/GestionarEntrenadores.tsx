@@ -56,6 +56,7 @@ export const GestionarEntrenadores: React.FC = () => {
       const data = await adminEntrenadorService.listarTodos();
       setEntrenadores(data);
     } catch (error) {
+      console.error('Error al cargar los entrenadores:', error);
       toast.error('Error al cargar los entrenadores');
     } finally {
       setLoading(false);

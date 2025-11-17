@@ -1,4 +1,4 @@
-import axios from './axiosConfig';
+import axios, { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 
 export interface UsuarioDTO {
@@ -56,8 +56,9 @@ export const usuarioService = {
       const response = await axios.put(`/admin/usuarios/${id}`, updateData);
       toast.success('Perfil actualizado correctamente');
       return response.data.data || response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al actualizar el perfil';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al actualizar el perfil';
       toast.error(errorMessage);
       throw error;
     }
@@ -70,6 +71,7 @@ export const usuarioService = {
       localStorage.setItem('user_settings', JSON.stringify(configuracion));
       toast.success('Configuración guardada correctamente');
     } catch (error) {
+      console.error('Error al guardar la configuración:', error);
       toast.error('Error al guardar la configuración');
       throw error;
     }
@@ -84,6 +86,7 @@ export const usuarioService = {
         recordatoriosClases: true,
       };
     } catch (error) {
+      console.error('Error al obtener la configuración:', error);
       return {
         notificacionesEmail: true,
         recordatoriosClases: true,

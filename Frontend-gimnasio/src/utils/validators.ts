@@ -98,7 +98,7 @@ export const validators = {
  */
 export const validateField = (
   value: string,
-  rules: Array<(val: string) => boolean | { validator: (val: string, ...args: any[]) => boolean; args?: any[] }>
+  rules: Array<(val: string) => boolean | { validator: (val: string, ...args: unknown[]) => boolean; args?: unknown[] }>
 ): string | null => {
   for (const rule of rules) {
     if (typeof rule === 'function') {

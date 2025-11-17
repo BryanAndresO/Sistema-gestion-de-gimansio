@@ -3,8 +3,15 @@ import { Card } from '../../components/common/Card';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { useApi } from '../../hooks/useApi';
 
+interface Reporte {
+  totalUsuarios: number;
+  totalClases: number;
+  totalReservas: number;
+  reservasHoy: number;
+}
+
 export const Reportes: React.FC = () => {
-  const { data: reporteData, loading } = useApi<any>('/admin/reportes/general');
+  const { data: reporteData, loading } = useApi<Reporte>('/admin/reportes/general');
 
   const reporte = reporteData || {};
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { ClaseCard } from '../../components/clases/ClaseCard';
@@ -10,8 +10,14 @@ import { claseService } from '../../services/core/claseService';
 import { reservaService } from '../../services/core/reservaService';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { STORAGE_KEYS } from '../../utils/constants';
-import { Toast } from '../../components/common/Toast';
-import type { ToastType } from '../../components/common/Toast';
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
+
+interface User {
+  idUsuario: number;
+  nombre: string;
+  rol: string;
+}
 
 export const NuevaReserva: React.FC = () => {
   const navigate = useNavigate();
@@ -20,28 +26,24 @@ export const NuevaReserva: React.FC = () => {
   const [claseSeleccionada, setClaseSeleccionada] = useState<ClaseDTO | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [reservando, setReservando] = useState(false);
-  const [user] = useLocalStorage<any>(STORAGE_KEYS.USER, null);
-  const [toast, setToast] = useState<{ message: string; type: ToastType; visible: boolean }>({
-    message: '',
-    type: 'info',
-    visible: false,
-  });
+  const [user] = useLocalStorage<User | null>(STORAGE_KEYS.USER, null);
 
-  useEffect(() => {
-    cargarClasesDisponibles();
-  }, []);
-
-  const cargarClasesDisponibles = async () => {
+  const cargarClasesDisponibles = useCallback(async () => {
     try {
       setLoading(true);
       const data = await claseService.obtenerClasesDisponibles();
       setClases(data);
     } catch (error) {
-      mostrarToast('Error al cargar las clases', 'error');
+      console.error('Error al cargar las clases:', error);
+      toast.error('Error al cargar las clases');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    cargarClasesDisponibles();
+  }, [cargarClasesDisponibles]);
 
   const handleReservar = (idClase: number) => {
     const clase = clases.find(c => c.idClase === idClase);
@@ -57,20 +59,16 @@ export const NuevaReserva: React.FC = () => {
     try {
       setReservando(true);
       await reservaService.crearReserva(Number(user.idUsuario), claseSeleccionada.idClase);
-      mostrarToast('Reserva creada exitosamente', 'success');
+      toast.success('Reserva creada exitosamente');
       setShowConfirmModal(false);
       setClaseSeleccionada(null);
       setTimeout(() => navigate('/reservas'), 1500);
-    } catch (error: any) {
-      mostrarToast(error.response?.data?.message || 'Error al crear la reserva', 'error');
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      toast.error(axiosError.response?.data?.message || 'Error al crear la reserva');
     } finally {
       setReservando(false);
     }
-  };
-
-  const mostrarToast = (message: string, type: ToastType) => {
-    setToast({ message, type, visible: true });
-    setTimeout(() => setToast({ ...toast, visible: false }), 3000);
   };
 
   return (
@@ -120,14 +118,6 @@ export const NuevaReserva: React.FC = () => {
         }}
         isLoading={reservando}
       />
-
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.visible}
-        onClose={() => setToast({ ...toast, visible: false })}
-      />
     </>
   );
-};
 

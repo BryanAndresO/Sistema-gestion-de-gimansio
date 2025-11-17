@@ -52,13 +52,13 @@ export const removeFromStorage = (key: string): void => {
 /**
  * Debounce function
  */
-export const debounce = <T extends (...args: any[]) => any>(
-  func: T,
+export const debounce = <F extends (...args: any[]) => any>(
+  func: F,
   wait: number
-): ((...args: Parameters<T>) => void) => {
+): ((...args: Parameters<F>) => void) => {
   let timeout: NodeJS.Timeout | null = null;
   
-  return (...args: Parameters<T>) => {
+  return (...args: Parameters<F>) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
@@ -67,13 +67,13 @@ export const debounce = <T extends (...args: any[]) => any>(
 /**
  * Throttle function
  */
-export const throttle = <T extends (...args: any[]) => any>(
-  func: T,
+export const throttle = <F extends (...args: any[]) => any>(
+  func: F,
   limit: number
-): ((...args: Parameters<T>) => void) => {
+): ((...args: Parameters<F>) => void) => {
   let inThrottle: boolean = false;
   
-  return (...args: Parameters<T>) => {
+  return (...args: Parameters<F>) => {
     if (!inThrottle) {
       func(...args);
       inThrottle = true;

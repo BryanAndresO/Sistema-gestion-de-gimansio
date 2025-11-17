@@ -1,4 +1,4 @@
-import axios from './axiosConfig';
+import axios, { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 
 export interface ClaseAdminDTO {
@@ -55,8 +55,9 @@ export const adminClaseService = {
       const response = await axios.post('/admin/clases', clase);
       toast.success('Clase creada exitosamente');
       return response.data.data || response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al crear la clase';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al crear la clase';
       toast.error(errorMessage);
       throw error;
     }
@@ -68,8 +69,9 @@ export const adminClaseService = {
       const response = await axios.put(`/admin/clases/${id}`, clase);
       toast.success('Clase actualizada exitosamente');
       return response.data.data || response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al actualizar la clase';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al actualizar la clase';
       toast.error(errorMessage);
       throw error;
     }
@@ -80,8 +82,9 @@ export const adminClaseService = {
     try {
       await axios.delete(`/admin/clases/${id}`);
       toast.success('Clase eliminada exitosamente');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al eliminar la clase';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al eliminar la clase';
       toast.error(errorMessage);
       throw error;
     }
@@ -92,8 +95,9 @@ export const adminClaseService = {
     try {
       await axios.patch(`/admin/clases/${id}/desactivar`);
       toast.success('Clase desactivada exitosamente');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al desactivar la clase';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al desactivar la clase';
       toast.error(errorMessage);
       throw error;
     }
@@ -104,8 +108,9 @@ export const adminClaseService = {
     try {
       await axios.patch(`/admin/clases/${id}/activar`);
       toast.success('Clase activada exitosamente');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Error al activar la clase';
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const errorMessage = axiosError.response?.data?.message || 'Error al activar la clase';
       toast.error(errorMessage);
       throw error;
     }

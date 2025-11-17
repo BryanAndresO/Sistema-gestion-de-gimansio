@@ -4,7 +4,6 @@ import { Card } from '../../components/common/Card';
 import { Breadcrumb } from '../../components/layout/Breadcrumb';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
-import { usuarioService } from '../../services/core/usuarioService';
 import { authService } from '../../services/core/authService';
 import { toast } from 'react-toastify';
 import { usePermissions } from '../../hooks/usePermissions';
