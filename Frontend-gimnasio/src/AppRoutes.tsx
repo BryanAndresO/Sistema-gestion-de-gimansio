@@ -14,7 +14,6 @@ import { Settings } from './pages/user/Settings';
 import { Notifications } from './pages/user/Notifications';
 import { CatalogoClases } from './pages/clases/CatalogoClases';
 import { DetalleClase } from './pages/clases/DetalleClase';
-import { HorarioSemanal } from './pages/clases/HorarioSemanal';
 import { MisReservas } from './pages/reservas/MisReservas';
 import { NuevaReserva } from './pages/reservas/NuevaReserva';
 import { NuevaReservaAdmin } from './pages/reservas/NuevaReservaAdmin';
@@ -115,14 +114,6 @@ export const AppRoutes: React.FC = () => {
           element={
             <MainLayout>
               <DetalleClase />
-            </MainLayout>
-          }
-        />
-        <Route
-          path={ROUTES.HORARIO_SEMANAL}
-          element={
-            <MainLayout>
-              <HorarioSemanal />
             </MainLayout>
           }
         />

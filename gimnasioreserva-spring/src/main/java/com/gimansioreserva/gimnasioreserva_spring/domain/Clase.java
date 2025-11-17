@@ -45,18 +45,6 @@ public class Clase {
     @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reserva> reservas = new ArrayList<>();
 
-    // Relación 1:N con Horario (opcional)
-    @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL)
-    private List<Horario> horariosAsignados = new ArrayList<>();
-
-    // Getter y Setter
-    public List<Horario> getHorariosAsignados() {
-        return horariosAsignados;
-    }
-
-    public void setHorariosAsignados(List<Horario> horariosAsignados) {
-        this.horariosAsignados = horariosAsignados;
-    }
     // Constructores
     public Clase() {}
 

@@ -111,28 +111,6 @@ public class TestDataBuilder {
         return reserva;
     }
 
-    // ========== Horario Builders ==========
-
-    public Horario buildHorario(Clase clase) {
-        Horario horario = new Horario();
-        horario.setDiaSemana(DayOfWeek.MONDAY);
-        horario.setHoraInicio(LocalTime.of(9, 0));
-        horario.setHoraFin(LocalTime.of(10, 0));
-        horario.setActivo(true);
-        horario.setClase(clase);
-        return horario;
-    }
-
-    public Horario buildHorario(DayOfWeek diaSemana, LocalTime horaInicio, LocalTime horaFin, Clase clase) {
-        Horario horario = new Horario();
-        horario.setDiaSemana(diaSemana);
-        horario.setHoraInicio(horaInicio);
-        horario.setHoraFin(horaFin);
-        horario.setActivo(true);
-        horario.setClase(clase);
-        return horario;
-    }
-
     // ========== Helper Methods ==========
 
     public static LocalDateTime fechaProxima() {

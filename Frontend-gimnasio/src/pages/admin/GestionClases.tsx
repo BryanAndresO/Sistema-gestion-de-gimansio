@@ -145,7 +145,7 @@ export const GestionClases: React.FC = () => {
 
   return (
     <div>
-      <Breadcrumb items={[{ label: 'Admin', href: '/admin' }, { label: 'Gestión de Clases' }]} />
+      <Breadcrumb items={[{ label: 'Admin', path: '/admin' }, { label: 'Gestión de Clases' }]} />
 
       <div className="flex justify-between items-center mb-6">
         <div>
