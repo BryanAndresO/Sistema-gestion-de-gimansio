@@ -1,7 +1,6 @@
 package com.gimansioreserva.gimnasioreserva_spring.domain;
 
-
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,10 +38,12 @@ public class Clase {
     // Relación N:1 con Entrenador
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_entrenador", nullable = false)
+    @JsonIgnoreProperties("clases")
     private  Entrenador entrenador; // Esto establece una relación donde muchas clases pueden ser impartidas por un solo entrenador.
 
     // Relación 1:N con Reserva
     @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("clase")
     private List<Reserva> reservas = new ArrayList<>();
 
     // Constructores

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios, { type AxiosError } from '../services/core/axiosConfig';
-import { API_BASE_URL } from '../utils/constants';
+import axios from '../services/core/axiosConfig';
+import { AxiosError } from 'axios';
 
 interface ApiState<T> {
   data: T | null;
@@ -44,6 +44,10 @@ export const useApi = <T = any>(
         },
         withCredentials: true, // Asegurar que withCredentials esté configurado
       });
+
+      console.log('API Response:', response.data);
+      console.log('Response type:', typeof response.data);
+      console.log('Is array?', Array.isArray(response.data));
 
       setState({
         data: response.data,

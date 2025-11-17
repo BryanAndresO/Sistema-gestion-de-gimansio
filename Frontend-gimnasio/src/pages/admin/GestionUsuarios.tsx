@@ -26,7 +26,7 @@ export const GestionUsuarios: React.FC = () => {
     activo: true,
   });
 
-  const { data: usuariosData, loading, refetch } = useApi<Usuario[]>('/admin/usuarios');
+  const { data: usuariosData, loading, error, refetch } = useApi<Usuario[]>('/admin/usuarios');
   const { mutate: createUser, loading: creating } = useApiMutation();
   const { mutate: updateUser, loading: updating } = useApiMutation();
   const { mutate: deleteUser, loading: deleting } = useApiMutation();
@@ -211,6 +211,16 @@ export const GestionUsuarios: React.FC = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando usuarios...</p>
         </div>
+      ) : error ? (
+        <Card>
+          <div className="text-center py-12">
+            <p className="text-red-600 text-lg font-semibold">Error al cargar usuarios</p>
+            <p className="text-gray-600 mt-2">{error}</p>
+            <Button onClick={refetch} variant="primary" className="mt-4">
+              Reintentar
+            </Button>
+          </div>
+        </Card>
       ) : (
         <Card>
           <Table data={usuarios} columns={columns} />

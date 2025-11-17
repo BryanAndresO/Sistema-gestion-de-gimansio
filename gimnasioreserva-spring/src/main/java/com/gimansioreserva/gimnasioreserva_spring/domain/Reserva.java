@@ -1,4 +1,5 @@
 package com.gimansioreserva.gimnasioreserva_spring.domain;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -20,11 +21,13 @@ public class Reserva {
     // Relación N:1 con Usuario
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
+    @JsonIgnoreProperties("reservas")
     private Usuario usuario;
 
     // Relación N:1 con Clase
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_clase", nullable = false)
+    @JsonIgnoreProperties("reservas")
     private Clase clase;
 
     // Constructores

@@ -1,6 +1,6 @@
 package com.gimansioreserva.gimnasioreserva_spring.domain;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +28,7 @@ public class Entrenador {
 
     // Relación 1:N con Clase
     @OneToMany(mappedBy = "entrenador", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("entrenador")
     private List<Clase> clases = new ArrayList<>();
 
     // Constructores
