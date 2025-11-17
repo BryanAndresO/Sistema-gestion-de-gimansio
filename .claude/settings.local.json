@@ -16,7 +16,8 @@
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)",
       "Bash(./gradlew bootRun:*)",
       "Bash(npm run build:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

@@ -2,8 +2,9 @@ import React from 'react';
 import { classNames } from '../../utils/helpers';
 
 interface Column<T> {
+  key: string;
   header: string;
-  accessor: keyof T | ((row: T) => React.ReactNode);
+  render?: (value: any, row: T) => React.ReactNode;
   className?: string;
 }
 
@@ -14,17 +15,25 @@ interface TableProps<T> {
   className?: string;
 }
 
-export function Table<T extends { id?: string | number }>({
+export function Table<T extends Record<string, any>>({
   data,
   columns,
   onRowClick,
   className,
 }: TableProps<T>) {
-  const renderCell = (row: T, accessor: Column<T>['accessor']) => {
-    if (typeof accessor === 'function') {
-      return accessor(row);
+  const renderCell = (row: T, column: Column<T>) => {
+    const value = row[column.key];
+
+    if (column.render) {
+      return column.render(value, row);
     }
-    return String(row[accessor]);
+
+    // Handle undefined or null values
+    if (value === undefined || value === null) {
+      return 'N/A';
+    }
+
+    return String(value);
   };
 
   return (
@@ -46,27 +55,38 @@ export function Table<T extends { id?: string | number }>({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((row, rowIndex) => (
-            <tr
-              key={row.id || rowIndex}
-              onClick={() => onRowClick?.(row)}
-              className={classNames(
-                onRowClick && 'cursor-pointer hover:bg-gray-50'
-              )}
-            >
-              {columns.map((column, colIndex) => (
-                <td
-                  key={colIndex}
-                  className={classNames(
-                    'px-6 py-4 whitespace-nowrap text-sm text-gray-900',
-                    column.className
-                  )}
-                >
-                  {renderCell(row, column.accessor)}
-                </td>
-              ))}
+          {data.length === 0 ? (
+            <tr>
+              <td
+                colSpan={columns.length}
+                className="px-6 py-4 text-center text-sm text-gray-500"
+              >
+                No hay datos disponibles
+              </td>
             </tr>
-          ))}
+          ) : (
+            data.map((row, rowIndex) => (
+              <tr
+                key={rowIndex}
+                onClick={() => onRowClick?.(row)}
+                className={classNames(
+                  onRowClick && 'cursor-pointer hover:bg-gray-50'
+                )}
+              >
+                {columns.map((column, colIndex) => (
+                  <td
+                    key={colIndex}
+                    className={classNames(
+                      'px-6 py-4 whitespace-nowrap text-sm text-gray-900',
+                      column.className
+                    )}
+                  >
+                    {renderCell(row, column)}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

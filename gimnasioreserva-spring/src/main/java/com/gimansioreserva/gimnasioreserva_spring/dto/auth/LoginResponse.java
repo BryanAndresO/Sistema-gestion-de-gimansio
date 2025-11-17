@@ -4,6 +4,7 @@ public class LoginResponse {
 
     private String accessToken;
     private String refreshToken;
+    private Long idUsuario;
     private String correo;
     private String nombre;
     private String rol;
@@ -11,9 +12,10 @@ public class LoginResponse {
     // Constructores
     public LoginResponse() {}
 
-    public LoginResponse(String accessToken, String refreshToken, String correo, String nombre, String rol) {
+    public LoginResponse(String accessToken, String refreshToken, Long idUsuario, String correo, String nombre, String rol) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        this.idUsuario = idUsuario;
         this.correo = correo;
         this.nombre = nombre;
         this.rol = rol;
@@ -58,6 +60,14 @@ public class LoginResponse {
 
     public void setRol(String rol) {
         this.rol = rol;
+    }
+
+    public Long getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
     }
 }
 

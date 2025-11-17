@@ -7,6 +7,8 @@ export interface EntrenadorAdminDTO {
   especialidad: string;
   certificaciones?: string;
   activo: boolean;
+  totalClases?: number;
+  clasesActivas?: number;
 }
 
 export interface CreateEntrenadorData {
@@ -117,5 +119,46 @@ export const adminEntrenadorService = {
       toast.error(errorMessage);
       throw error;
     }
+  },
+
+  // Desactivar entrenador
+  desactivar: async (id: number): Promise<void> => {
+    try {
+      await axios.patch(`/admin/entrenadores/${id}/desactivar`);
+      toast.success('Entrenador desactivado exitosamente');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Error al desactivar el entrenador';
+      toast.error(errorMessage);
+      throw error;
+    }
+  },
+
+  // Activar entrenador
+  activar: async (id: number): Promise<void> => {
+    try {
+      await axios.patch(`/admin/entrenadores/${id}/activar`);
+      toast.success('Entrenador activado exitosamente');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Error al activar el entrenador';
+      toast.error(errorMessage);
+      throw error;
+    }
+  },
+
+  // Aliases para compatibilidad con GestionarEntrenadores.tsx
+  listarTodos: async (): Promise<EntrenadorAdminDTO[]> => {
+    return adminEntrenadorService.listarEntrenadores();
+  },
+
+  crear: async (datos: EntrenadorAdminDTO): Promise<EntrenadorAdminDTO> => {
+    return adminEntrenadorService.crearEntrenador(datos);
+  },
+
+  actualizar: async (id: number, datos: EntrenadorAdminDTO): Promise<EntrenadorAdminDTO> => {
+    return adminEntrenadorService.actualizarEntrenador(id, datos);
+  },
+
+  eliminar: async (id: number): Promise<void> => {
+    return adminEntrenadorService.eliminarEntrenador(id);
   },
 };

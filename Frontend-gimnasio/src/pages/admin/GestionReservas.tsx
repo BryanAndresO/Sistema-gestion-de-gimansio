@@ -20,15 +20,15 @@ export const GestionReservas: React.FC = () => {
   const [filtroEstado, setFiltroEstado] = useState<string>('TODAS');
   const [busqueda, setBusqueda] = useState('');
 
-  // Por ahora usamos un endpoint genérico, luego el backend puede crear uno específico para admin
-  const { data: reservasData, loading, refetch } = useApi<Reserva[]>('/api/reservas/todas');
+  // Endpoint de admin para listar todas las reservas
+  const { data: reservasData, loading, refetch } = useApi<Reserva[]>('/admin/reservas');
   const { mutate: cambiarEstado, loading: cambiando } = useApiMutation();
 
   const reservas = reservasData || [];
 
   const handleCambiarEstado = async (id: number, nuevoEstado: string) => {
     try {
-      await cambiarEstado(`/api/reservas/${id}/estado`, {
+      await cambiarEstado(`/admin/reservas/${id}/estado`, {
         method: 'PATCH',
         data: { estado: nuevoEstado },
       });

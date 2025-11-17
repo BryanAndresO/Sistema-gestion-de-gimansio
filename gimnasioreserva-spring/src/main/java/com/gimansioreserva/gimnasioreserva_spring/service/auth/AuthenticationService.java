@@ -51,6 +51,7 @@ public class AuthenticationService {
         return new LoginResponse(
                 accessToken,
                 refreshToken,
+                usuario.getIdUsuario(),
                 usuario.getCorreo(),
                 usuario.getNombre(),
                 usuario.getRol()

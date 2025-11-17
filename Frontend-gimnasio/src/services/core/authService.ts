@@ -31,18 +31,20 @@ export const authService = {
         contrasena: password,
       });
 
-      // El backend devuelve: { success: true, data: { accessToken, refreshToken, correo, nombre, rol } }
+      // El backend devuelve: { success: true, data: { accessToken, refreshToken, correo, nombre, rol, idUsuario } }
       const responseData = response.data?.data || response.data;
-      
+
       console.log('Login response:', responseData);
-      
+
       if (responseData && responseData.accessToken) {
         // Guardar el token en localStorage (como string simple, no JSON)
         localStorage.setItem(STORAGE_KEYS.TOKEN, responseData.accessToken);
-        
+
         // Guardar información del usuario (como JSON)
         const user = {
+          idUsuario: responseData.idUsuario,
           email: responseData.correo,
+          correo: responseData.correo,
           nombre: responseData.nombre,
           rol: responseData.rol,
         };
