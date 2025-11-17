@@ -31,5 +31,6 @@ EXPOSE 8080
 # Variables de entorno por defecto (se sobrescriben en Render)
 ENV JAVA_OPTS="-Xms256m -Xmx512m"
 
-# Ejecutar la aplicación
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+# Ejecutar la aplicación y respetar la variable de entorno PORT de la plataforma
+# Si PORT no está definida, usar 8080 por defecto
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.port=${PORT:-8080} -jar app.jar"]
