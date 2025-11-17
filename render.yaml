@@ -19,3 +19,16 @@ services:
       # Optionally expose the H2 console in Render (not recommended for production)
       - key: SPRING_H2_CONSOLE_ENABLED
         value: "true"
+      # H2 in-memory DB settings for the `render` profile (testing only)
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:h2:mem:renderdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+      - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+        value: org.h2.Driver
+      - key: SPRING_DATASOURCE_USERNAME
+        value: sa
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: ""
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+        value: org.hibernate.dialect.H2Dialect
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
