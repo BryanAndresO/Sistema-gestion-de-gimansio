@@ -65,6 +65,17 @@ export const GestionEntrenadores: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validaciones
+    if (!formData.nombre.trim()) {
+      alert('El nombre es obligatorio y solo puede contener letras y espacios.');
+      return;
+    }
+
+    if (!formData.telefono.trim() || formData.telefono.length !== 10) {
+      alert('El teléfono es obligatorio y debe tener 10 dígitos.');
+      return;
+    }
+
     try {
       if (editingEntrenador) {
         await updateEntrenador(`/admin/entrenadores/${editingEntrenador.idEntrenador}`, {
@@ -163,7 +174,12 @@ export const GestionEntrenadores: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
             <Input
               value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  nombre: e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, ''),
+                })
+              }
               required
               placeholder="Nombre del entrenador"
             />
@@ -183,7 +199,12 @@ export const GestionEntrenadores: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
             <Input
               value={formData.telefono}
-              onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  telefono: e.target.value.replace(/\D/g, '').slice(0, 10),
+                })
+              }
               required
               placeholder="Número de contacto"
             />

@@ -32,6 +32,16 @@ export const GestionClases: React.FC = () => {
     activo: true,
   });
 
+  const nombresClases = [
+    'Yoga',
+    'Spinning',
+    'CrossFit',
+    'Pilates',
+    'Zumba',
+    'Funcional',
+    'Body Pump',
+  ];
+
   const { data: clasesData, loading, refetch } = useApi<Clase[]>('/admin/clases');
   const { data: entrenadoresData } = useApi<any[]>('/admin/entrenadores');
   const { mutate: createClase, loading: creating } = useApiMutation();
@@ -171,14 +181,22 @@ export const GestionClases: React.FC = () => {
         title={editingClase ? 'Editar Clase' : 'Nueva Clase'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* SELECT BOX PARA NOMBRE */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-            <Input
+            <select
               value={formData.nombre}
               onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
               required
-              placeholder="Ej: Yoga, Spinning, CrossFit"
-            />
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Seleccionar clase</option>
+              {nombresClases.map((nombre) => (
+                <option key={nombre} value={nombre}>
+                  {nombre}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
