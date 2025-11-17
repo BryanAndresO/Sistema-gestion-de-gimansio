@@ -1,10 +1,3 @@
-<<<<<<< HEAD
--- Script de datos iniciales para Dev
--- Se agregarán 20 registros de prueba por tabla
-
--- Nota: El usuario administrador se crea automáticamente mediante DataInitializer.java
--- Credenciales: admin@hotmail.com / admin
-=======
 -- Script de datos iniciales
 -- Usuario admin por defecto
 
@@ -18,4 +11,3 @@ FROM DUAL
 WHERE NOT EXISTS (
     SELECT 1 FROM usuarios WHERE correo = 'admin@gimnasio.com'
 );
->>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b

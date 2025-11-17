@@ -1,36 +1,21 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ROUTES, USER_ROLES } from '../../utils/constants';
-=======
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ROUTES, STORAGE_KEYS } from '../../utils/constants';
->>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ROUTES, STORAGE_KEYS, USER_ROLES } from '../../utils/constants';
 import { classNames } from '../../utils/helpers';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { STORAGE_KEYS } from '../../utils/constants';
 import { authService } from '../../services/core/authService';
 import { toast } from 'react-toastify';
 
 interface UserData {
+  nombre?: string;
+  email?: string;
+  correo?: string;
   rol: string;
 }
 
 export const Sidebar: React.FC = () => {
   const location = useLocation();
-<<<<<<< HEAD
   const navigate = useNavigate();
-  const [user] = useLocalStorage<any>(STORAGE_KEYS.USER, null);
-
-  const handleLogout = () => {
-    authService.logout();
-    toast.success('Sesión cerrada correctamente');
-    navigate(ROUTES.LOGIN);
-  };
-=======
   const [userData, setUserData] = useState<UserData | null>(null);
->>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
 
   useEffect(() => {
     const userDataStr = localStorage.getItem(STORAGE_KEYS.USER);
@@ -43,7 +28,13 @@ export const Sidebar: React.FC = () => {
     }
   }, []);
 
-  const isAdmin = userData?.rol === 'ADMIN';
+  const handleLogout = () => {
+    authService.logout();
+    toast.success('Sesión cerrada correctamente');
+    navigate(ROUTES.LOGIN);
+  };
+
+  const isAdmin = userData?.rol === USER_ROLES.ADMIN || userData?.rol === 'ADMIN';
 
   const userMenuItems = [
     { path: ROUTES.DASHBOARD, label: 'Dashboard', icon: '📊' },
@@ -53,35 +44,6 @@ export const Sidebar: React.FC = () => {
     { path: ROUTES.SETTINGS, label: 'Configuración', icon: '⚙️' },
   ];
 
-<<<<<<< HEAD
-  const isAdmin = user?.rol === USER_ROLES.ADMIN;
-
-  return (
-    <aside className="w-64 bg-white shadow-md p-4 flex flex-col h-full">
-      {/* Información del usuario */}
-      {user && (
-        <div className="mb-4 pb-4 border-b border-gray-200">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <span className="text-blue-600 font-semibold">
-                {(user.nombre || user.email || 'U').charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {user.nombre || user.email}
-              </p>
-              <p className="text-xs text-gray-500">
-                {isAdmin ? 'Administrador' : 'Usuario'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Menú de navegación */}
-      <nav className="flex-1">
-=======
   const adminMenuItems = [
     { path: ROUTES.ADMIN_DASHBOARD, label: 'Panel Admin', icon: '🎯' },
     { path: ROUTES.ADMIN_USUARIOS, label: 'Usuarios', icon: '👥' },
@@ -94,15 +56,30 @@ export const Sidebar: React.FC = () => {
   const menuItems = isAdmin ? adminMenuItems : userMenuItems;
 
   return (
-    <aside className="w-64 bg-white shadow-md p-4">
-      <div className="mb-4 p-3 bg-gray-100 rounded-lg">
-        <p className="text-xs text-gray-600 uppercase font-semibold">
-          {isAdmin ? 'Administrador' : 'Usuario'}
-        </p>
-      </div>
+    <aside className="w-64 bg-white shadow-md p-4 flex flex-col h-full">
+      {/* Información del usuario */}
+      {userData && (
+        <div className="mb-4 pb-4 border-b border-gray-200">
+          <div className="flex items-center space-x-2">
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <span className="text-blue-600 font-semibold">
+                {(userData.nombre || userData.email || userData.correo || 'U').charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {userData.nombre || userData.email || userData.correo}
+              </p>
+              <p className="text-xs text-gray-500">
+                {isAdmin ? 'Administrador' : 'Usuario'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <nav>
->>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
+      {/* Menú de navegación */}
+      <nav className="flex-1">
         <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.path}>
@@ -123,9 +100,21 @@ export const Sidebar: React.FC = () => {
         </ul>
       </nav>
 
-<<<<<<< HEAD
+      {/* Vista de usuario para admins */}
+      {isAdmin && (
+        <div className="mt-auto pt-4 border-t border-gray-200">
+          <Link
+            to={ROUTES.DASHBOARD}
+            className="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors mb-2"
+          >
+            <span className="mr-2">👤</span>
+            Vista de Usuario
+          </Link>
+        </div>
+      )}
+
       {/* Botón de cerrar sesión */}
-      <div className="mt-auto pt-4 border-t border-gray-200">
+      <div className={`${isAdmin ? '' : 'mt-auto'} pt-4 border-t border-gray-200`}>
         <button
           onClick={handleLogout}
           className="w-full flex items-center px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
@@ -134,20 +123,6 @@ export const Sidebar: React.FC = () => {
           Cerrar Sesión
         </button>
       </div>
-=======
-      {isAdmin && (
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <Link
-            to={ROUTES.DASHBOARD}
-            className="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <span className="mr-2">👤</span>
-            Vista de Usuario
-          </Link>
-        </div>
-      )}
->>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
     </aside>
   );
 };
-

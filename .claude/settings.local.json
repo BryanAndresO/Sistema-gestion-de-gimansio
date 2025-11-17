@@ -13,7 +13,10 @@
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"INSERT INTO usuarios (nombre, correo, contrasena, rol, activo) VALUES (''Administrador'', ''admin@gimnasio.com'', ''$2a$10$J5Nc37ardDKvwEk4vCxQvOikHdY0NXvgXid2Nh3/x9X.n/QEvkvaq'', ''ADMIN'', true);\" gimnasio_reserva)",
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"UPDATE usuarios SET contrasena = ''$2a$10$J5Nc37ardDKvwEk4vCxQvOikHdY0NXvgXid2Nh3/x9X.n/QEvkvaq'', rol = ''ADMIN'' WHERE correo = ''admin@gimnasio.com'';\" gimnasio_reserva)",
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"SELECT id_usuario, nombre, correo, rol, activo FROM usuarios WHERE correo = ''admin@gimnasio.com'';\" gimnasio_reserva)",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)"
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)",
+      "Bash(./gradlew bootRun:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

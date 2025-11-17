@@ -19,10 +19,15 @@ import { MisReservas } from './pages/reservas/MisReservas';
 import { NuevaReserva } from './pages/reservas/NuevaReserva';
 import { NuevaReservaAdmin } from './pages/reservas/NuevaReservaAdmin';
 import { HistorialReservas } from './pages/reservas/HistorialReservas';
-<<<<<<< HEAD
 import { CrearUsuarioAdmin } from './pages/admin/CrearUsuarioAdmin';
+import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { GestionUsuarios } from './pages/admin/GestionUsuarios';
+import { GestionClases } from './pages/admin/GestionClases';
 import { GestionarClases } from './pages/admin/GestionarClases';
+import { GestionEntrenadores } from './pages/admin/GestionEntrenadores';
 import { GestionarEntrenadores } from './pages/admin/GestionarEntrenadores';
+import { GestionReservas } from './pages/admin/GestionReservas';
+import { Reportes } from './pages/admin/Reportes';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { authService } from './services/core/authService';
 
@@ -33,14 +38,6 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
   return <>{children}</>;
 };
-=======
-import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { GestionUsuarios } from './pages/admin/GestionUsuarios';
-import { GestionClases } from './pages/admin/GestionClases';
-import { GestionEntrenadores } from './pages/admin/GestionEntrenadores';
-import { GestionReservas } from './pages/admin/GestionReservas';
-import { Reportes } from './pages/admin/Reportes';
->>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -130,7 +127,6 @@ export const AppRoutes: React.FC = () => {
           }
         />
 
-<<<<<<< HEAD
         {/* Páginas de reservas */}
         <Route
           path={ROUTES.RESERVAS}
@@ -167,10 +163,34 @@ export const AppRoutes: React.FC = () => {
 
         {/* Páginas de administración */}
         <Route
+          path={ROUTES.ADMIN_DASHBOARD}
+          element={
+            <MainLayout>
+              <AdminDashboard />
+            </MainLayout>
+          }
+        />
+        <Route
+          path={ROUTES.ADMIN_USUARIOS}
+          element={
+            <MainLayout>
+              <GestionUsuarios />
+            </MainLayout>
+          }
+        />
+        <Route
           path={ROUTES.ADMIN_CREAR_USUARIO}
           element={
             <MainLayout>
               <CrearUsuarioAdmin />
+            </MainLayout>
+          }
+        />
+        <Route
+          path={ROUTES.ADMIN_CLASES}
+          element={
+            <MainLayout>
+              <GestionClases />
             </MainLayout>
           }
         />
@@ -183,10 +203,34 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
+          path={ROUTES.ADMIN_ENTRENADORES}
+          element={
+            <MainLayout>
+              <GestionEntrenadores />
+            </MainLayout>
+          }
+        />
+        <Route
           path={ROUTES.ADMIN_GESTIONAR_ENTRENADORES}
           element={
             <MainLayout>
               <GestionarEntrenadores />
+            </MainLayout>
+          }
+        />
+        <Route
+          path={ROUTES.ADMIN_RESERVAS}
+          element={
+            <MainLayout>
+              <GestionReservas />
+            </MainLayout>
+          }
+        />
+        <Route
+          path={ROUTES.ADMIN_REPORTES}
+          element={
+            <MainLayout>
+              <Reportes />
             </MainLayout>
           }
         />
@@ -201,60 +245,6 @@ export const AppRoutes: React.FC = () => {
           </MainLayout>
         }
       />
-=======
-      {/* Páginas de Admin */}
-      <Route
-        path={ROUTES.ADMIN_DASHBOARD}
-        element={
-          <MainLayout>
-            <AdminDashboard />
-          </MainLayout>
-        }
-      />
-      <Route
-        path={ROUTES.ADMIN_USUARIOS}
-        element={
-          <MainLayout>
-            <GestionUsuarios />
-          </MainLayout>
-        }
-      />
-      <Route
-        path={ROUTES.ADMIN_CLASES}
-        element={
-          <MainLayout>
-            <GestionClases />
-          </MainLayout>
-        }
-      />
-      <Route
-        path={ROUTES.ADMIN_ENTRENADORES}
-        element={
-          <MainLayout>
-            <GestionEntrenadores />
-          </MainLayout>
-        }
-      />
-      <Route
-        path={ROUTES.ADMIN_RESERVAS}
-        element={
-          <MainLayout>
-            <GestionReservas />
-          </MainLayout>
-        }
-      />
-      <Route
-        path={ROUTES.ADMIN_REPORTES}
-        element={
-          <MainLayout>
-            <Reportes />
-          </MainLayout>
-        }
-      />
-
-      {/* 404 */}
-      <Route path="*" element={<NotFound />} />
->>>>>>> e39eae1eec38d0310bcdb8123965bf6706f0af2b
     </Routes>
   );
 };
