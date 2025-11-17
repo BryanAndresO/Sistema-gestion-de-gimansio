@@ -9,11 +9,17 @@ interface ClaseCardProps {
   clase: ClaseDTO;
   onReservar?: (id: number) => void;
   disabled?: boolean;
+  yaReservado?: boolean;
 }
 
-export const ClaseCard: React.FC<ClaseCardProps> = ({ clase, onReservar, disabled = false }) => {
+export const ClaseCard: React.FC<ClaseCardProps> = ({ clase, onReservar, disabled = false, yaReservado = false }) => {
   const cuposDisponibles = clase.cuposDisponibles || 0;
   const estaDisponible = cuposDisponibles > 0;
+
+  // Verificar si la fecha ya pasó
+  const fechaClase = new Date(clase.horario);
+  const ahora = new Date();
+  const esFechaPasada = fechaClase < ahora;
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -56,7 +62,36 @@ export const ClaseCard: React.FC<ClaseCardProps> = ({ clase, onReservar, disable
               Ver Detalles
             </Button>
           </Link>
-          {estaDisponible && onReservar && (
+
+          {/* Mostrar diferentes estados del botón */}
+          {yaReservado ? (
+            <Button
+              variant="secondary"
+              fullWidth
+              size="sm"
+              disabled
+            >
+              ✓ Ya Reservado
+            </Button>
+          ) : esFechaPasada ? (
+            <Button
+              variant="secondary"
+              fullWidth
+              size="sm"
+              disabled
+            >
+              Fecha Pasada
+            </Button>
+          ) : !estaDisponible ? (
+            <Button
+              variant="secondary"
+              fullWidth
+              size="sm"
+              disabled
+            >
+              Sin Cupos
+            </Button>
+          ) : onReservar ? (
             <Button
               variant="primary"
               fullWidth
@@ -66,7 +101,7 @@ export const ClaseCard: React.FC<ClaseCardProps> = ({ clase, onReservar, disable
             >
               Reservar
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
     </Card>

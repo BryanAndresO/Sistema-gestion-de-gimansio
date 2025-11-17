@@ -20,6 +20,7 @@ export const CatalogoClases: React.FC = () => {
   const [claseSeleccionada, setClaseSeleccionada] = useState<ClaseDTO | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [reservando, setReservando] = useState(false);
+  const [reservasUsuario, setReservasUsuario] = useState<number[]>([]);
   const [toast, setToast] = useState<{ message: string; type: ToastType; visible: boolean }>({
     message: '',
     type: 'info',
@@ -29,7 +30,10 @@ export const CatalogoClases: React.FC = () => {
 
   useEffect(() => {
     cargarClases();
-  }, []);
+    if (user?.idUsuario) {
+      cargarReservasUsuario();
+    }
+  }, [user]);
 
   const cargarClases = async () => {
     try {
@@ -41,6 +45,19 @@ export const CatalogoClases: React.FC = () => {
       setClases([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const cargarReservasUsuario = async () => {
+    try {
+      if (!user?.idUsuario) return;
+      const reservas = await reservaService.obtenerReservasConfirmadas(user.idUsuario);
+      // Extraer los IDs de las clases que ya tienen reserva
+      const idsClasesReservadas = reservas.map(reserva => reserva.idClase);
+      setReservasUsuario(idsClasesReservadas);
+    } catch (error) {
+      console.error('Error al cargar reservas del usuario:', error);
+      setReservasUsuario([]);
     }
   };
 
@@ -84,6 +101,7 @@ export const CatalogoClases: React.FC = () => {
       setShowConfirmModal(false);
       setClaseSeleccionada(null);
       cargarClases(); // Recargar para actualizar cupos
+      cargarReservasUsuario(); // Recargar reservas del usuario
     } catch (error: any) {
       mostrarToast(error.response?.data?.message || 'Error al crear la reserva', 'error');
     } finally {
@@ -117,6 +135,7 @@ export const CatalogoClases: React.FC = () => {
               key={clase.idClase}
               clase={clase}
               onReservar={handleReservar}
+              yaReservado={reservasUsuario.includes(clase.idClase)}
             />
           ))}
         </div>

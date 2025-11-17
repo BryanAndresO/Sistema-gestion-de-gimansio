@@ -2,6 +2,7 @@ package com.gimansioreserva.gimnasioreserva_spring.service.admin;
 
 import com.gimansioreserva.gimnasioreserva_spring.domain.Usuario;
 import com.gimansioreserva.gimnasioreserva_spring.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,9 +13,11 @@ import java.util.Optional;
 public class AdminUsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminUsuarioService(UsuarioRepository usuarioRepository) {
+    public AdminUsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Listar todos los usuarios
@@ -69,6 +72,11 @@ public class AdminUsuarioService {
             usuario.setRol("USER");
         }
 
+        // Encriptar la contraseña antes de guardar
+        if (usuario.getContrasena() != null && !usuario.getContrasena().isEmpty()) {
+            usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        }
+
         return usuarioRepository.save(usuario);
     }
 
@@ -87,10 +95,10 @@ public class AdminUsuarioService {
                         usuario.setCorreo(usuarioActualizado.getCorreo());
                     }
 
-                    // Solo actualizar contraseña si se proporcionó
+                    // Solo actualizar contraseña si se proporcionó, y encriptarla
                     if (usuarioActualizado.getContrasena() != null &&
                             !usuarioActualizado.getContrasena().isEmpty()) {
-                        usuario.setContrasena(usuarioActualizado.getContrasena());
+                        usuario.setContrasena(passwordEncoder.encode(usuarioActualizado.getContrasena()));
                     }
 
                     usuario.setRol(usuarioActualizado.getRol());
