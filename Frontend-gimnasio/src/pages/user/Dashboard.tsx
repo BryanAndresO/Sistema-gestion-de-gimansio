@@ -100,34 +100,7 @@ export const Dashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <Card title="Acciones Rápidas">
-              <div className="space-y-2">
-                <Link
-                  to={ROUTES.ADMIN_CREAR_USUARIO}
-                  className="block px-4 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
-                >
-                  Crear Usuario Admin
-                </Link>
-                <Link
-                  to={ROUTES.NUEVA_RESERVA_ADMIN}
-                  className="block px-4 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100"
-                >
-                  Reservar Clase para Usuario
-                </Link>
-                <Link
-                  to={ROUTES.ADMIN_GESTIONAR_CLASES}
-                  className="block px-4 py-2 bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
-                >
-                  Gestionar Clases
-                </Link>
-                <Link
-                  to={ROUTES.ADMIN_GESTIONAR_ENTRENADORES}
-                  className="block px-4 py-2 bg-orange-50 text-orange-700 rounded hover:bg-orange-100"
-                >
-                  Gestionar Entrenadores
-                </Link>
-              </div>
-            </Card>
+            
             <Card title="Actividad Reciente">
               <p className="text-gray-600">No hay actividad reciente</p>
             </Card>
