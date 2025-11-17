@@ -174,12 +174,6 @@ export const Dashboard: React.FC = () => {
                   Nueva Reserva
                 </Link>
                 <Link
-                  to={ROUTES.HORARIO_SEMANAL}
-                  className="block px-4 py-2 bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
-                >
-                  Ver Horario Semanal
-                </Link>
-                <Link
                   to={ROUTES.HISTORIAL_RESERVAS}
                   className="block px-4 py-2 bg-orange-50 text-orange-700 rounded hover:bg-orange-100"
                 >

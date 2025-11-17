@@ -40,8 +40,6 @@ export const Sidebar: React.FC = () => {
     { path: ROUTES.DASHBOARD, label: 'Inicio', icon: '📊' },
     { path: ROUTES.CLASES, label: 'Clases', icon: '🏋️' },
     { path: ROUTES.RESERVAS, label: 'Mis Reservas', icon: '📅' },
-    { path: ROUTES.PROFILE, label: 'Perfil', icon: '👤' },
-    { path: ROUTES.SETTINGS, label: 'Configuración', icon: '⚙️' },
   ];
 
   const adminMenuItems = [

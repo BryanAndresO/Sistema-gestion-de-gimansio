@@ -43,10 +43,7 @@ export const Header: React.FC = () => {
             {user ? (
               <>
                 <Link to={ROUTES.DASHBOARD} className="text-gray-700 hover:text-blue-600">
-                  Dashboard
-                </Link>
-                <Link to={ROUTES.PROFILE} className="text-gray-700 hover:text-blue-600">
-                  Perfil
+                  Inicio
                 </Link>
                 <div className="flex items-center text-sm text-gray-600">
                   <span>{user.nombre || user.email}</span>
