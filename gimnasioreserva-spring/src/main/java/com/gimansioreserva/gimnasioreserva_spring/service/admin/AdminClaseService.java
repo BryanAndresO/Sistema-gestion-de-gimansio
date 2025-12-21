@@ -90,20 +90,20 @@ public class AdminClaseService {
     // Crear nueva clase
     @Transactional
     public Optional<ClaseAdminDTO> crear(ClaseAdminDTO dto) {
-        return entrenadorRepository.findById(dto.getIdEntrenador())
-                .map(entrenador -> {
-                    Clase clase = new Clase();
-                    clase.setNombre(dto.getNombre());
-                    clase.setDescripcion(dto.getDescripcion());
-                    clase.setHorario(dto.getHorario());
-                    clase.setCupo(dto.getCupo());
-                    clase.setDuracionMinutos(dto.getDuracionMinutos() != null ? dto.getDuracionMinutos() : 60);
-                    clase.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
-                    clase.setEntrenador(entrenador);
+        Entrenador entrenador = entrenadorRepository.findById(dto.getIdEntrenador())
+                .orElseThrow(() -> new RuntimeException("Entrenador no encontrado con ID: " + dto.getIdEntrenador()));
 
-                    Clase guardada = claseRepository.save(clase);
-                    return convertirADTO(guardada);
-                });
+        Clase clase = new Clase();
+        clase.setNombre(dto.getNombre());
+        clase.setDescripcion(dto.getDescripcion());
+        clase.setHorario(dto.getHorario());
+        clase.setCupo(dto.getCupo());
+        clase.setDuracionMinutos(dto.getDuracionMinutos() != null ? dto.getDuracionMinutos() : 60);
+        clase.setActivo(dto.getActivo() != null ? dto.getActivo() : true);
+        clase.setEntrenador(entrenador);
+
+        Clase guardada = claseRepository.save(clase);
+        return Optional.of(convertirADTO(guardada));
     }
 
     // Actualizar clase

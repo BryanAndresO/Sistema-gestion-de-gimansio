@@ -81,10 +81,15 @@ public class AdminClaseController {
 
     // Crear nueva clase
     @PostMapping
-    public ResponseEntity<ClaseAdminDTO> crear(@RequestBody ClaseAdminDTO dto) {
-        return adminClaseService.crear(dto)
-                .map(clase -> ResponseEntity.status(HttpStatus.CREATED).body(clase))
-                .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+    public ResponseEntity<?> crear(@RequestBody ClaseAdminDTO dto) {
+        try {
+            return adminClaseService.crear(dto)
+                    .map(clase -> ResponseEntity.status(HttpStatus.CREATED).body(clase))
+                    .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Collections.singletonMap("message", e.getMessage()));
+        }
     }
 
     // Actualizar clase

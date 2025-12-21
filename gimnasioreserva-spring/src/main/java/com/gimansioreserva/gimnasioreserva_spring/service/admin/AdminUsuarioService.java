@@ -85,10 +85,13 @@ public class AdminUsuarioService {
     public Optional<Usuario> actualizar(Long id, Usuario usuarioActualizado) {
         return usuarioRepository.findById(id)
                 .map(usuario -> {
-                    usuario.setNombre(usuarioActualizado.getNombre());
+                    if (usuarioActualizado.getNombre() != null) {
+                        usuario.setNombre(usuarioActualizado.getNombre());
+                    }
 
-                    // Solo actualizar correo si cambió y no existe
-                    if (!usuario.getCorreo().equals(usuarioActualizado.getCorreo())) {
+                    // Solo actualizar correo si cambió, no es nulo y no existe
+                    if (usuarioActualizado.getCorreo() != null &&
+                            !usuario.getCorreo().equals(usuarioActualizado.getCorreo())) {
                         if (usuarioRepository.existsByCorreo(usuarioActualizado.getCorreo())) {
                             throw new RuntimeException("El correo ya está registrado");
                         }
@@ -101,8 +104,12 @@ public class AdminUsuarioService {
                         usuario.setContrasena(passwordEncoder.encode(usuarioActualizado.getContrasena()));
                     }
 
-                    usuario.setRol(usuarioActualizado.getRol());
-                    usuario.setActivo(usuarioActualizado.getActivo());
+                    if (usuarioActualizado.getRol() != null) {
+                        usuario.setRol(usuarioActualizado.getRol());
+                    }
+                    if (usuarioActualizado.getActivo() != null) {
+                        usuario.setActivo(usuarioActualizado.getActivo());
+                    }
 
                     return usuarioRepository.save(usuario);
                 });

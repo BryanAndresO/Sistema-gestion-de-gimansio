@@ -76,7 +76,7 @@ public class AdminUsuarioController {
 
     // Actualizar usuario
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizar(
+    public ResponseEntity<?> actualizar(
             @PathVariable Long id,
             @RequestBody Usuario usuario) {
         try {
@@ -84,7 +84,8 @@ public class AdminUsuarioController {
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Collections.singletonMap("message", e.getMessage()));
         }
     }
 

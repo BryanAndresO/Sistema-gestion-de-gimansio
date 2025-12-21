@@ -76,10 +76,9 @@ class AdminClaseControllerTest {
     void testCrear_Success() {
         when(adminClaseService.crear(claseDTO)).thenReturn(Optional.of(claseDTO));
 
-        ResponseEntity<ClaseAdminDTO> response = adminClaseController.crear(claseDTO);
+        ResponseEntity<?> response = adminClaseController.crear(claseDTO);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
     }
 }
-
