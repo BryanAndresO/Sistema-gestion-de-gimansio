@@ -72,8 +72,3 @@ El sistema incluye una cuenta administrativa preconfigurada para el primer despl
 
 - **Usuario**: `admin@hotmail.com`
 - **Contraseña**: `admin`
-
-
-
----
-© 2025 Equipo de Desarrollo. Todos los derechos reservados.
