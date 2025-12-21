@@ -73,7 +73,7 @@ El sistema incluye una cuenta administrativa preconfigurada para el primer despl
 - **Usuario**: `admin@hotmail.com`
 - **Contraseña**: `admin`
 
-**Nota**: Consulte el [Manual Técnico](docs/MANUAL_TECNICO.md) para instrucciones sobre cómo asegurar estas credenciales en producción.
+
 
 ---
 © 2025 Equipo de Desarrollo. Todos los derechos reservados.
