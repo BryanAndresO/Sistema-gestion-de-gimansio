@@ -13,9 +13,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.gimansioreserva.gimnasioreserva_spring.service.core.EventoGymService;
-import com.gimansioreserva.gimnasioreserva_spring.domain.EventoGym;
-import com.gimansioreserva.gimnasioreserva_spring.dto.core.EmitirEventoRequest;
 
 
 
@@ -82,15 +79,5 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/simular")
-    public void simularEvento(@RequestBody EmitirEventoRequest request) {
-
-        EventoGym evento = new EventoGym(
-                request.getClaseId(),
-                request.getTipo()
-        );
-
-        eventoGymService.emitirEvento(evento);
-    }
 }
 
