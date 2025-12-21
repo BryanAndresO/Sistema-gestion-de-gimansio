@@ -83,3 +83,17 @@ jobs:
         with:
           name: frontend-dist
           path: Frontend-gimnasio/dist/
+
+  # ========================================
+  # DEPLOY - Trigger Render Deploy
+  # ========================================
+  deploy:
+    name: Deploy to Render
+    needs: [backend-build, frontend-build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy Backend
+        if: success()
+        run: curl "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"

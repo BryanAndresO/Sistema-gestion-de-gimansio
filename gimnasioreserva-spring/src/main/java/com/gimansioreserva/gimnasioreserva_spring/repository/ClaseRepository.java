@@ -32,7 +32,7 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
     // Buscar clases por rango de fechas
     @Query("SELECT c FROM Clase c WHERE c.horario BETWEEN :fechaInicio AND :fechaFin AND c.activo = true")
     List<Clase> buscarPorRangoFechas(@Param("fechaInicio") LocalDateTime fechaInicio,
-                                     @Param("fechaFin") LocalDateTime fechaFin);
+            @Param("fechaFin") LocalDateTime fechaFin);
 
     // Obtener clases próximas
     @Query("SELECT c FROM Clase c WHERE c.horario > :ahora AND c.activo = true ORDER BY c.horario ASC")
