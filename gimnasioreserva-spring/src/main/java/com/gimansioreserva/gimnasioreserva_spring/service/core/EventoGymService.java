@@ -1,9 +1,11 @@
 package com.gimansioreserva.gimnasioreserva_spring.service.core;
 
 import com.gimansioreserva.gimnasioreserva_spring.domain.EventoGym;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
+@Service
 public class EventoGymService {
     /**
      * Sinks.Many actúa como un Publisher dinámico
