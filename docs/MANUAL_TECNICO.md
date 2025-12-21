@@ -38,7 +38,7 @@ Para conectar el entorno de desarrollo local con el backend desplegado en la nub
 
 ## 3. Guía de Despliegue en Render
 
-El proyecto está optimizado para despliegue en Render utilizando Docker para el backend y Static Site para el frontend.
+El proyecto está optimizado para despliegue en Render utilizando Docker para el backend y Static Site (local) para el frontend.
 
 ### Despliegue del Backend
 
