@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -76,5 +78,6 @@ public class AuthController {
             return ResponseUtil.error("Error al restablecer contraseña: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
 
