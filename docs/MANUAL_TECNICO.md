@@ -15,7 +15,6 @@ Este sistema es una aplicación web full-stack para la gestión de reservas de g
 ---
 
 ## 2. Configuración de Entornos
-
 ### Entorno de Desarrollo Local
 
 #### Backend (Spring Boot)
