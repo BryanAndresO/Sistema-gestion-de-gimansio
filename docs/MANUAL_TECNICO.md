@@ -86,7 +86,7 @@ Con esto, cada vez que haga un push a `master`, GitHub ejecutará los tests y so
 ## 5. Guía de Administración
 
 ### Credenciales de Acceso Inicial
-El sistema inicia con una cuenta administrativa por defecto establecida en `DataInitializer.java`:
+El sistema inicia con una cuenta de administrador que esta establecida en `DataInitializer.java`:
 
 - **Usuario**: `admin@hotmail.com`
 - **Contraseña**: `admin`
