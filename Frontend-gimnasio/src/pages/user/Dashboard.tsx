@@ -8,6 +8,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { ROUTES } from '../../utils/constants';
 import { reservaService } from '../../services/core/reservaService';
 import type { ReservaDTO } from '../../services/core/reservaService';
+import { RecomendacionesLive } from '../../components/recomendaciones/RecomendacionesLive';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -78,6 +79,7 @@ export const Dashboard: React.FC = () => {
       {isAdmin ? (
         // Vista de Administrador
         <>
+          <RecomendacionesLive />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <Card>
               <div className="text-center">
@@ -109,6 +111,7 @@ export const Dashboard: React.FC = () => {
       ) : (
         // Vista de Usuario
         <>
+          <RecomendacionesLive />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <Card>
               <div className="text-center">

@@ -11,6 +11,7 @@ import { STORAGE_KEYS } from '../../utils/constants';
 import { toast } from 'react-toastify';
 import { Button } from '../../components/common/Button';
 import { AxiosError } from 'axios';
+import { RecomendacionesLive } from '../../components/recomendaciones/RecomendacionesLive';
 
 interface User {
   idUsuario: number;
@@ -75,6 +76,8 @@ export const MisReservas: React.FC = () => {
   return (
     <>
       <Breadcrumb items={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Mis Reservas' }]} />
+      
+      <RecomendacionesLive />
       
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Mis Reservas</h1>
