@@ -108,7 +108,7 @@ Los administradores pueden:
 En el entorno de Render, se utiliza H2 en memoria. Esto significa que **los datos se restablecen cada vez que el servicio se reinicia**. Esto es intencional para demostraciones y control de costos.
 
 Si se requiere persistencia permanente:
-1. Provisionar una base de datos MySQL o PostgreSQL (ej. Railway, AWS RDS).
+1. Provisionar una base de datos MySQL o PostgreSQL.
 2. Actualizar la variable de entorno `DATABASE_URL` con la cadena de conexión JDBC del proveedor externo.
 
 ### Dockerfile
