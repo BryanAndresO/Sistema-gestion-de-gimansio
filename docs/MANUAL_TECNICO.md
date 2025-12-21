@@ -65,7 +65,26 @@ El proyecto está optimizado para despliegue en Render utilizando Docker para el
 
 ---
 
-## 4. Guía de Administración
+## 4. Configuración de Despliegue Continuo (CD)
+
+El sistema ya incluye un pipeline automatizado `(.github/workflows/ci.yml)`. Para activarlo:
+
+### 1. Obtener Deploy Hook de Render
+1. En Render Dashboard, ir a **Settings** de su servicio Web (Backend).
+2. Buscar la sección **Deploy Hook**.
+3. Copiar la URL del hook (ej: `https://api.render.com/deploy/srv-xxxxx?key=yyyyy`).
+   - _Nota: Asegúrese de desactivar "Auto-Deploy" en la configuración general del servicio._
+
+### 2. Configurar Secreto en GitHub
+1. En su repositorio GitHub, ir a **Settings** > **Secrets and variables** > **Actions**.
+2. Crear un **Repository secret**:
+   - `RENDER_BACKEND_DEPLOY_HOOK`: Pegar la URL del hook del Backend.
+
+Con esto, cada vez que haga un push a `master`, GitHub ejecutará los tests y solo si pasan, desplegará el Backend automáticamente en Render.
+
+---
+
+## 5. Guía de Administración
 
 ### Credenciales de Acceso Inicial
 El sistema inicia con una cuenta administrativa por defecto establecida en `DataInitializer.java`:
