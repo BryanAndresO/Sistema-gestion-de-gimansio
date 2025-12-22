@@ -1,7 +1,9 @@
 package com.gimansioreserva.gimnasioreserva_spring.service.core;
 
 import com.gimansioreserva.gimnasioreserva_spring.domain.Clase;
+import com.gimansioreserva.gimnasioreserva_spring.domain.EventoGym;
 import com.gimansioreserva.gimnasioreserva_spring.domain.Reserva;
+import com.gimansioreserva.gimnasioreserva_spring.domain.TipoEvento;
 import com.gimansioreserva.gimnasioreserva_spring.domain.Usuario;
 import com.gimansioreserva.gimnasioreserva_spring.dto.core.ReservaDTO;
 import com.gimansioreserva.gimnasioreserva_spring.exception.ClaseNoDisponibleException;
@@ -28,17 +30,20 @@ public class ReservaService {
     private final UsuarioRepository usuarioRepository;
     private final ReservaMapper reservaMapper;
     private final ReservaValidator reservaValidator;
+    private final EventoGymService eventoGymService;
 
     public ReservaService(ReservaRepository reservaRepository,
                          ClaseRepository claseRepository,
                          UsuarioRepository usuarioRepository,
                          ReservaMapper reservaMapper,
-                         ReservaValidator reservaValidator) {
+                         ReservaValidator reservaValidator,
+                         EventoGymService eventoGymService) {
         this.reservaRepository = reservaRepository;
         this.claseRepository = claseRepository;
         this.usuarioRepository = usuarioRepository;
         this.reservaMapper = reservaMapper;
         this.reservaValidator = reservaValidator;
+        this.eventoGymService = eventoGymService;
     }
 
     @Transactional
@@ -65,6 +70,15 @@ public class ReservaService {
         reservaValidator.validarCrearReserva(reserva, clase);
 
         Reserva guardada = reservaRepository.save(reserva);
+        
+        // Emitir evento si la clase se llenó
+        if (clase.getCuposDisponibles() == 0) {
+            eventoGymService.emitirEvento(new EventoGym(
+                clase.getIdClase().toString(), 
+                TipoEvento.CLASE_LLENA
+            ));
+        }
+        
         return reservaMapper.toDTO(guardada);
     }
 
@@ -82,6 +96,15 @@ public class ReservaService {
 
         reserva.setEstado("CANCELADA");
         Reserva actualizada = reservaRepository.save(reserva);
+        
+        // Emitir evento si se liberó un cupo
+        if (reserva.getClase().getCuposDisponibles() > 0) {
+            eventoGymService.emitirEvento(new EventoGym(
+                reserva.getClase().getIdClase().toString(), 
+                TipoEvento.CUPO_DISPONIBLE
+            ));
+        }
+        
         return reservaMapper.toDTO(actualizada);
     }
 
