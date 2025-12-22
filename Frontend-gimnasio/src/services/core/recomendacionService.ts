@@ -20,6 +20,45 @@ export interface ConectarRecomendacionesOptions {
 }
 
 /**
+ * Convierte un timestamp que puede venir como array [año, mes, día, hora, minuto, segundo]
+ * o como string ISO a un string ISO estándar
+ */
+const convertirTimestamp = (timestamp: any): string => {
+  if (!timestamp) {
+    return new Date().toISOString();
+  }
+
+  // Si ya es un string ISO, devolverlo
+  if (typeof timestamp === 'string') {
+    return timestamp;
+  }
+
+  // Si es un array [año, mes, día, hora, minuto, segundo, nanosegundo]
+  if (Array.isArray(timestamp) && timestamp.length >= 6) {
+    const [year, month, day, hour, minute, second] = timestamp;
+    // Los meses en Java LocalDateTime van de 1-12, pero Date usa 0-11
+    const date = new Date(year, month - 1, day, hour, minute, second || 0);
+    return date.toISOString();
+  }
+
+  // Si es un objeto con propiedades
+  if (typeof timestamp === 'object' && timestamp !== null) {
+    const { year, month, day, hour, minute, second } = timestamp;
+    if (year !== undefined && month !== undefined && day !== undefined) {
+      const date = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0);
+      return date.toISOString();
+    }
+  }
+
+  // Por defecto, intentar crear una fecha
+  try {
+    return new Date(timestamp).toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+};
+
+/**
  * Conecta al endpoint SSE de recomendaciones
  * Nota: EventSource no soporta headers personalizados, por lo que si el backend
  * requiere autenticación, debería usar cookies o query parameters.
@@ -50,7 +89,16 @@ export const conectarRecomendaciones = (
   // Manejar mensajes recibidos
   eventSource.onmessage = (event: MessageEvent) => {
     try {
+      // El backend ahora envía RecomendacionDTO directamente
       const recomendacion: RecomendacionDTO = JSON.parse(event.data);
+      
+      // Normalizar el timestamp si viene en formato array
+      if (recomendacion.timestamp) {
+        recomendacion.timestamp = convertirTimestamp(recomendacion.timestamp);
+      } else {
+        recomendacion.timestamp = new Date().toISOString();
+      }
+      
       onMensaje(recomendacion);
     } catch (error) {
       console.error('Error al parsear mensaje SSE:', error);
@@ -94,4 +142,3 @@ export const conectarRecomendaciones = (
 
   return close;
 };
-

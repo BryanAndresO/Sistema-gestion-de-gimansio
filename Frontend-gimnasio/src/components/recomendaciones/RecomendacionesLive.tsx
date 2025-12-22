@@ -10,43 +10,29 @@ import { formatRelativeTime } from '../../utils/formatters';
 export const RecomendacionesLive: React.FC = () => {
   const { recomendaciones, isConnected, error } = useRecomendaciones();
 
-  // Función para obtener el mensaje según el tipo de evento
-  const getMensajePorTipo = (tipo: string): string => {
-    switch (tipo) {
-      case 'CUPO_DISPONIBLE':
-        return '¡Cupo disponible!';
-      case 'CLASE_LLENA':
-        return 'Clase llena';
-      case 'CAMBIO_HORARIO':
-        return 'Cambio de horario';
-      default:
-        return 'Nueva recomendación';
-    }
-  };
-
-  // Función para obtener el color según el tipo de evento
-  const getColorPorTipo = (tipo: string): string => {
-    switch (tipo) {
-      case 'CUPO_DISPONIBLE':
+  // Función para obtener el color según la prioridad
+  const getColorPorPrioridad = (prioridad?: number): string => {
+    switch (prioridad) {
+      case 1: // CUPO_DISPONIBLE - Alta prioridad
         return 'bg-green-50 border-green-200 text-green-800';
-      case 'CLASE_LLENA':
-        return 'bg-red-50 border-red-200 text-red-800';
-      case 'CAMBIO_HORARIO':
+      case 2: // CAMBIO_HORARIO - Media prioridad
         return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-      default:
+      case 3: // CLASE_LLENA - Baja prioridad
+        return 'bg-red-50 border-red-200 text-red-800';
+      default: // Sin prioridad o prioridad 4+
         return 'bg-blue-50 border-blue-200 text-blue-800';
     }
   };
 
-  // Función para obtener el icono según el tipo de evento
-  const getIconoPorTipo = (tipo: string): string => {
-    switch (tipo) {
-      case 'CUPO_DISPONIBLE':
+  // Función para obtener el icono según la prioridad
+  const getIconoPorPrioridad = (prioridad?: number): string => {
+    switch (prioridad) {
+      case 1: // CUPO_DISPONIBLE
         return '✓';
-      case 'CLASE_LLENA':
-        return '✕';
-      case 'CAMBIO_HORARIO':
+      case 2: // CAMBIO_HORARIO
         return '↻';
+      case 3: // CLASE_LLENA
+        return '✕';
       default:
         return 'ℹ';
     }
@@ -54,31 +40,34 @@ export const RecomendacionesLive: React.FC = () => {
 
   return (
     <Card title="Recomendaciones en Tiempo Real" className="mb-6">
-      {/* Indicador de estado de conexión */}
-      <div className="mb-4 flex items-center gap-2">
-        <div
-          className={`w-3 h-3 rounded-full ${
-            isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
-          }`}
-          title={isConnected ? 'Conectado' : 'Desconectado'}
-        />
-        <span className="text-sm text-gray-600">
-          {isConnected ? 'Conectado' : 'Desconectado'}
-        </span>
+      {/* Estado de conexión */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div
+            className={`h-3 w-3 rounded-full ${
+              isConnected ? 'bg-green-500' : 'bg-gray-400'
+            }`}
+          />
+          <span className="text-sm text-gray-600">
+            {isConnected ? 'Conectado' : 'Desconectado'}
+          </span>
+        </div>
       </div>
 
-      {/* Mensaje de error */}
+      {/* Error */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-800 text-sm">
-          {error}
+        <div className="mb-4 rounded-lg bg-red-50 p-3 text-red-800">
+          <p className="text-sm">{error}</p>
         </div>
       )}
 
       {/* Lista de recomendaciones */}
       {recomendaciones.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <p>No hay recomendaciones en este momento</p>
-          <p className="text-sm mt-2">
+        <div className="py-8 text-center">
+          <p className="text-gray-500">
+            No hay recomendaciones en este momento
+          </p>
+          <p className="mt-2 text-sm text-gray-400">
             Las recomendaciones aparecerán aquí cuando estén disponibles
           </p>
         </div>
@@ -112,6 +101,12 @@ export const RecomendacionesLive: React.FC = () => {
                         {formatRelativeTime(recomendacion.timestamp)}
                       </p>
                     )}
+                    {recomendacion.prioridad && (
+                      <p>
+                        <span className="font-medium">Prioridad:</span>{' '}
+                        {recomendacion.prioridad}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -133,4 +128,3 @@ export const RecomendacionesLive: React.FC = () => {
     </Card>
   );
 };
-
