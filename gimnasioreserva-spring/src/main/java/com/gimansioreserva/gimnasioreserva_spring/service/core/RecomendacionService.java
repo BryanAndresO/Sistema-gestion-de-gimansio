@@ -26,7 +26,7 @@ public class RecomendacionService {
                                 evento.getTipo() == TipoEvento.RESERVA_CANCELADA
                 )
                 .flatMap(evento ->
-                    claseRepository.findById(Long.parseLong(evento.getClaseId()))
+                    Flux.fromOptional(claseRepository.findById(Long.parseLong(evento.getClaseId())))
                             .map(clase -> new RecomendacionDTO(
                                     evento.getClaseId(),
                                     clase.getNombre(),
@@ -34,7 +34,6 @@ public class RecomendacionService {
                                     generarPrioridad(evento.getTipo()),
                                     evento.getTimestamp()
                             ))
-                            .flux() // Convertir Optional a Flux
                 )
                 .distinct(RecomendacionDTO::getClaseId)
                 .onBackpressureLatest();
