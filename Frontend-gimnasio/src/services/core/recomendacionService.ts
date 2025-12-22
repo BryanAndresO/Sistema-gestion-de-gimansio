@@ -43,12 +43,12 @@ const convertirTimestamp = (timestamp: unknown): string => {
   }
 
   // Si es un objeto con propiedades
-  if (typeof timestamp === 'object' && timestamp !== null) {
-    const { year, month, day, hour, minute, second } = timestamp;
-    if (year !== undefined && month !== undefined && day !== undefined) {
-      const date = new Date(year, month - 1, day, hour || 0, minute || 0, second || 0);
-      return date.toISOString();
-    }
+  if (typeof timestamp === 'object' && timestamp !== null &&
+      'year' in timestamp && 'monthValue' in timestamp && 'dayOfMonth' in timestamp) {
+    const { year, monthValue, dayOfMonth, hour = 0, minute = 0, second = 0 } = timestamp as {
+      year: number; monthValue: number; dayOfMonth: number; hour?: number; minute?: number; second?: number; };
+    const date = new Date(year, monthValue - 1, dayOfMonth, hour, minute, second);
+    return date.toISOString();
   }
 
   // Por defecto, intentar crear una fecha

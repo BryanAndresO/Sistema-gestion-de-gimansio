@@ -68,13 +68,13 @@ export const useRecomendaciones = () => {
 
     // Cleanup: cerrar conexión al desmontar el componente
     return () => {
-      const currentClasesIds = clasesIdsRef.current; // Capturar el valor actual
+      const currentClasesIdsRef = clasesIdsRef.current; // Capturar el valor actual
       if (closeConnectionRef.current) {
         closeConnectionRef.current();
         closeConnectionRef.current = null;
       }
       // Limpiar el set de clases procesadas
-      currentClasesIds.clear();
+      currentClasesIdsRef.clear();
     };
   }, []); // Solo se ejecuta una vez al montar
 

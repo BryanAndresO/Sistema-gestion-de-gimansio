@@ -26,7 +26,7 @@ public class RecomendacionService {
                                 evento.getTipo() == TipoEvento.RESERVA_CANCELADA
                 )
                 .flatMap(evento ->
-                    Flux.fromOptional(claseRepository.findById(Long.parseLong(evento.getClaseId())))
+                    Mono.justOrEmpty(claseRepository.findById(Long.parseLong(evento.getClaseId())))
                             .map(clase -> new RecomendacionDTO(
                                     evento.getClaseId(),
                                     clase.getNombre(),
