@@ -7,7 +7,8 @@ import { STORAGE_KEYS, API_BASE_URL } from '../../utils/constants';
 
 export interface RecomendacionDTO {
   claseId: string;
-  tipo: 'CUPO_DISPONIBLE' | 'CLASE_LLENA' | 'CAMBIO_HORARIO';
+  mensaje: string;
+  prioridad?: number;
   timestamp: string;
 }
 
@@ -58,17 +59,6 @@ const convertirTimestamp = (timestamp: any): string => {
 };
 
 /**
- * Transforma EventoGym del backend a RecomendacionDTO del frontend
- */
-const transformarEventoGym = (eventoGym: any): RecomendacionDTO => {
-  return {
-    claseId: eventoGym.claseId || eventoGym.clase_id || '',
-    tipo: eventoGym.tipo || 'CUPO_DISPONIBLE',
-    timestamp: convertirTimestamp(eventoGym.timestamp),
-  };
-};
-
-/**
  * Conecta al endpoint SSE de recomendaciones
  * Nota: EventSource no soporta headers personalizados, por lo que si el backend
  * requiere autenticación, debería usar cookies o query parameters.
@@ -99,11 +89,15 @@ export const conectarRecomendaciones = (
   // Manejar mensajes recibidos
   eventSource.onmessage = (event: MessageEvent) => {
     try {
-      // Parsear el evento que viene del backend (EventoGym)
-      const eventoGym = JSON.parse(event.data);
+      // El backend ahora envía RecomendacionDTO directamente
+      const recomendacion: RecomendacionDTO = JSON.parse(event.data);
       
-      // Transformar EventoGym a RecomendacionDTO
-      const recomendacion = transformarEventoGym(eventoGym);
+      // Normalizar el timestamp si viene en formato array
+      if (recomendacion.timestamp) {
+        recomendacion.timestamp = convertirTimestamp(recomendacion.timestamp);
+      } else {
+        recomendacion.timestamp = new Date().toISOString();
+      }
       
       onMensaje(recomendacion);
     } catch (error) {
