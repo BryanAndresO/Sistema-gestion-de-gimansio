@@ -11,11 +11,14 @@ public class RecomendacionService {
 
     public Flux<RecomendacionDTO> generar(Flux<EventoGym> eventos) {
         return eventos
-                .filter(e ->
-                        e.getTipo() == TipoEvento.CUPO_DISPONIBLE ||
-                                e.getTipo() == TipoEvento.CLASE_LLENA ||
-                                e.getTipo() == TipoEvento.CAMBIO_HORARIO
+                .filter(evento ->
+                        evento.getTipo() == TipoEvento.CUPO_DISPONIBLE ||
+                                evento.getTipo() == TipoEvento.CLASE_LLENA ||
+                                evento.getTipo() == TipoEvento.CAMBIO_HORARIO ||
+                                evento.getTipo() == TipoEvento.RESERVA_CREADA ||
+                                evento.getTipo() == TipoEvento.RESERVA_CANCELADA
                 )
+
                 .map(e -> new RecomendacionDTO(
                         e.getClaseId(),
                         generarMensaje(e),
@@ -29,15 +32,22 @@ public class RecomendacionService {
     private String generarMensaje(EventoGym evento) {
         return switch (evento.getTipo()) {
             case CUPO_DISPONIBLE ->
-                    "¡Cupo disponible en la clase " + evento.getClaseId() + "! Reserva ahora.";
+                    "¡Cupo disponible en la clase " + evento.getClaseId() + "!";
+
             case CLASE_LLENA ->
-                    "La clase " + evento.getClaseId() + " está llena. Considera otras opciones.";
+                    "La clase " + evento.getClaseId() + " está llena.";
+
             case CAMBIO_HORARIO ->
-                    "Cambio de horario en la clase " + evento.getClaseId() + ". Revisa el nuevo horario.";
-            default ->
-                    "Evento informativo de la clase " + evento.getClaseId();
+                    "Cambio de horario en la clase " + evento.getClaseId() + ".";
+
+            case RESERVA_CREADA ->
+                    "Reserva creada en la clase " + evento.getClaseId() + ".";
+
+            case RESERVA_CANCELADA ->
+                    "Reserva cancelada en la clase " + evento.getClaseId() + ".";
         };
     }
+
 
     private Integer generarPrioridad(TipoEvento tipo) {
         return switch (tipo) {
