@@ -7,7 +7,8 @@ import { STORAGE_KEYS, API_BASE_URL } from '../../utils/constants';
 
 export interface RecomendacionDTO {
   claseId: string;
-  tipo: 'CUPO_DISPONIBLE' | 'CLASE_LLENA' | 'CAMBIO_HORARIO';
+  mensaje: string;
+  prioridad?: number;
   timestamp: string;
 }
 

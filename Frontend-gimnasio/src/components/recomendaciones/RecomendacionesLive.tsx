@@ -87,18 +87,18 @@ export const RecomendacionesLive: React.FC = () => {
           {recomendaciones.map((recomendacion, index) => (
             <div
               key={`${recomendacion.claseId}-${index}`}
-              className={`p-4 rounded-lg border-2 ${getColorPorTipo(
-                recomendacion.tipo
+              className={`p-4 rounded-lg border-2 ${getColorPorPrioridad(
+                recomendacion.prioridad
               )} transition-all hover:shadow-md`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xl font-bold">
-                      {getIconoPorTipo(recomendacion.tipo)}
+                      {getIconoPorPrioridad(recomendacion.prioridad)}
                     </span>
                     <h4 className="font-semibold">
-                      {getMensajePorTipo(recomendacion.tipo)}
+                      {recomendacion.mensaje}
                     </h4>
                   </div>
                   <div className="text-sm space-y-1">

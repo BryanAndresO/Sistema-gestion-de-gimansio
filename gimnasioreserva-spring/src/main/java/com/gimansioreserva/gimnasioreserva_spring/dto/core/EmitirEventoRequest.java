@@ -2,9 +2,6 @@ package com.gimansioreserva.gimnasioreserva_spring.dto.core;
 
 import com.gimansioreserva.gimnasioreserva_spring.domain.TipoEvento;
 
-/**
- * DTO para emitir eventos de prueba
- */
 public class EmitirEventoRequest {
 
     private String claseId;

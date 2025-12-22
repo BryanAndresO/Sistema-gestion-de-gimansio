@@ -9,10 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
-/**
- * Controller que actúa como Subscriber mediante SSE
- */
-
 @RestController
 @RequestMapping("/api/recomendaciones")
 public class RecomendacionStreamController {
@@ -20,17 +16,21 @@ public class RecomendacionStreamController {
     private final EventoGymService eventoGymService;
     private final RecomendacionService recomendacionService;
 
-    public RecomendacionStreamController(EventoGymService eventoGymService, 
-                                       RecomendacionService recomendacionService) {
+    public RecomendacionStreamController(EventoGymService eventoGymService,
+                                         RecomendacionService recomendacionService) {
         this.eventoGymService = eventoGymService;
         this.recomendacionService = recomendacionService;
     }
 
+    //SSE
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<RecomendacionDTO> stream() {
-        return recomendacionService.generar(eventoGymService.flujoEventos());
+    public Flux<RecomendacionDTO> streamRecomendaciones() {
+        return recomendacionService.generar(
+                eventoGymService.flujoEventos()
+        );
     }
 
+    //Simulación para Postman
     @PostMapping("/simular")
     public void simularEvento(@RequestBody EmitirEventoRequest request) {
 

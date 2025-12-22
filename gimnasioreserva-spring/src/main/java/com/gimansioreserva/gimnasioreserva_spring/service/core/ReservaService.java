@@ -50,11 +50,10 @@ public class ReservaService {
     public ReservaDTO crearReserva(Long idUsuario, Long idClase) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
+
         Clase clase = claseRepository.findById(idClase)
                 .orElseThrow(() -> new ClaseNoDisponibleException(idClase));
 
-        // Verificar si ya existe una reserva confirmada
         Optional<Reserva> reservaExistente = reservaRepository.buscarReservaDuplicada(idUsuario, idClase);
         if (reservaExistente.isPresent()) {
             throw new ReservaDuplicadaException(idUsuario, idClase);
@@ -66,19 +65,24 @@ public class ReservaService {
         reserva.setFechaReserva(LocalDateTime.now());
         reserva.setEstado("CONFIRMADA");
 
-        // Validar antes de guardar
         reservaValidator.validarCrearReserva(reserva, clase);
 
         Reserva guardada = reservaRepository.save(reserva);
-        
+
+        // Emitir evento de reserva creada
+        eventoGymService.emitirEvento(new EventoGym(
+                clase.getIdClase().toString(),
+                TipoEvento.RESERVA_CREADA
+        ));
+
         // Emitir evento si la clase se llenó
-        if (clase.getCuposDisponibles() == 0) {
+        if (clase.getCuposDisponibles() - 1 == 0) {
             eventoGymService.emitirEvento(new EventoGym(
-                clase.getIdClase().toString(), 
-                TipoEvento.CLASE_LLENA
+                    clase.getIdClase().toString(),
+                    TipoEvento.CLASE_LLENA
             ));
         }
-        
+
         return reservaMapper.toDTO(guardada);
     }
 
@@ -87,7 +91,6 @@ public class ReservaService {
         Reserva reserva = reservaRepository.findById(idReserva)
                 .orElseThrow(() -> new ReservaNoEncontradaException(idReserva));
 
-        // Verificar que la reserva pertenece al usuario
         if (!reserva.getUsuario().getIdUsuario().equals(idUsuario)) {
             throw new RuntimeException("La reserva no pertenece al usuario");
         }
@@ -96,17 +99,22 @@ public class ReservaService {
 
         reserva.setEstado("CANCELADA");
         Reserva actualizada = reservaRepository.save(reserva);
-        
-        // Emitir evento si se liberó un cupo
-        if (reserva.getClase().getCuposDisponibles() > 0) {
-            eventoGymService.emitirEvento(new EventoGym(
-                reserva.getClase().getIdClase().toString(), 
+
+        // Emitir evento de reserva cancelada
+        eventoGymService.emitirEvento(new EventoGym(
+                reserva.getClase().getIdClase().toString(),
+                TipoEvento.RESERVA_CANCELADA
+        ));
+
+        // Emitir evento de cupo disponible
+        eventoGymService.emitirEvento(new EventoGym(
+                reserva.getClase().getIdClase().toString(),
                 TipoEvento.CUPO_DISPONIBLE
-            ));
-        }
-        
+        ));
+
         return reservaMapper.toDTO(actualizada);
     }
+
 
     @Transactional(readOnly = true)
     public List<ReservaDTO> obtenerReservasPorUsuario(Long idUsuario) {

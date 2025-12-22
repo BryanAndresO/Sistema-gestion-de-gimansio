@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -46,7 +45,6 @@ public class SecurityConfig {
 
         config.setAllowCredentials(true);
 
-        // Parse allowed origins from application.properties
         List<String> originsList = new ArrayList<>(Arrays.asList(allowedOrigins.split(",")));
         config.setAllowedOriginPatterns(originsList);
 
@@ -70,13 +68,22 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/api-docs/**",
+                                "/api/recomendaciones/stream",
+                                "/api/recomendaciones/simular"
+                        ).permitAll()
+
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/clases/**").authenticated()
                         .requestMatchers("/api/reservas/**").authenticated()
                         .requestMatchers("/api/disponibilidad/**").authenticated()
                         .requestMatchers("/api/estadisticas/**").authenticated()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
+
                         .anyRequest().authenticated()
                 );
 
@@ -85,11 +92,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // ------------------------------
+    // AUTH MANAGER
+    // ------------------------------
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
             throws Exception {
         return configuration.getAuthenticationManager();
     }
-
-
 }
