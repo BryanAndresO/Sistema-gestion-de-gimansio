@@ -6,12 +6,14 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RecomendacionDTO {
     private final String claseId;
+    private final String nombreClase;
     private final String mensaje;
     private final Integer prioridad;
     private final LocalDateTime timestamp;
 
-    public RecomendacionDTO(String claseId, String mensaje, Integer prioridad, LocalDateTime timestamp) {
+    public RecomendacionDTO(String claseId, String nombreClase, String mensaje, Integer prioridad, LocalDateTime timestamp) {
         this.claseId = claseId;
+        this.nombreClase = nombreClase;
         this.mensaje = mensaje;
         this.prioridad = prioridad;
         this.timestamp = timestamp;
@@ -19,6 +21,10 @@ public class RecomendacionDTO {
 
     public String getClaseId() {
         return claseId;
+    }
+
+    public String getNombreClase() {
+        return nombreClase;
     }
 
     public String getMensaje() {

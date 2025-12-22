@@ -3,11 +3,18 @@ package com.gimansioreserva.gimnasioreserva_spring.service.core;
 import com.gimansioreserva.gimnasioreserva_spring.domain.EventoGym;
 import com.gimansioreserva.gimnasioreserva_spring.domain.TipoEvento;
 import com.gimansioreserva.gimnasioreserva_spring.dto.core.RecomendacionDTO;
+import com.gimansioreserva.gimnasioreserva_spring.repository.ClaseRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 @Service
 public class RecomendacionService {
+
+    private final ClaseRepository claseRepository;
+
+    public RecomendacionService(ClaseRepository claseRepository) {
+        this.claseRepository = claseRepository;
+    }
 
     public Flux<RecomendacionDTO> generar(Flux<EventoGym> eventos) {
         return eventos
@@ -18,36 +25,31 @@ public class RecomendacionService {
                                 evento.getTipo() == TipoEvento.RESERVA_CREADA ||
                                 evento.getTipo() == TipoEvento.RESERVA_CANCELADA
                 )
-
-                .map(e -> new RecomendacionDTO(
-                        e.getClaseId(),
-                        generarMensaje(e),
-                        generarPrioridad(e.getTipo()),
-                        e.getTimestamp()
-                ))
+                .flatMap(evento ->
+                    claseRepository.findById(Long.parseLong(evento.getClaseId()))
+                            .map(clase -> new RecomendacionDTO(
+                                    evento.getClaseId(),
+                                    clase.getNombre(),
+                                    generarMensaje(evento, clase.getNombre()),
+                                    generarPrioridad(evento.getTipo()),
+                                    evento.getTimestamp()
+                            ))
+                            .flux() // Convertir Optional a Flux
+                )
                 .distinct(RecomendacionDTO::getClaseId)
                 .onBackpressureLatest();
     }
 
-    private String generarMensaje(EventoGym evento) {
-        return switch (evento.getTipo()) {
-            case CUPO_DISPONIBLE ->
-                    "¡Cupo disponible en la clase " + evento.getClaseId() + "!";
-
-            case CLASE_LLENA ->
-                    "La clase " + evento.getClaseId() + " está llena.";
-
-            case CAMBIO_HORARIO ->
-                    "Cambio de horario en la clase " + evento.getClaseId() + ".";
-
-            case RESERVA_CREADA ->
-                    "Reserva creada en la clase " + evento.getClaseId() + ".";
-
-            case RESERVA_CANCELADA ->
-                    "Reserva cancelada en la clase " + evento.getClaseId() + ".";
+    private String generarMensaje(EventoGym evento, String nombreClase) {
+        String baseMensaje = switch (evento.getTipo()) {
+            case CUPO_DISPONIBLE -> "¡Cupo disponible!";
+            case CLASE_LLENA -> "Clase llena.";
+            case CAMBIO_HORARIO -> "Cambio de horario.";
+            case RESERVA_CREADA -> "Reserva creada.";
+            case RESERVA_CANCELADA -> "Reserva cancelada.";
         };
+        return baseMensaje + " en la clase " + nombreClase + ".";
     }
-
 
     private Integer generarPrioridad(TipoEvento tipo) {
         return switch (tipo) {

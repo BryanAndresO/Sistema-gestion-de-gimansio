@@ -7,6 +7,7 @@ import { STORAGE_KEYS, API_BASE_URL } from '../../utils/constants';
 
 export interface RecomendacionDTO {
   claseId: string;
+  nombreClase?: string; // Nuevo campo para el nombre de la clase
   mensaje: string;
   prioridad?: number;
   timestamp: string;

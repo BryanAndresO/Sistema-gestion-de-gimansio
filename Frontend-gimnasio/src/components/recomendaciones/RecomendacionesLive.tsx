@@ -92,8 +92,8 @@ export const RecomendacionesLive: React.FC = () => {
                   </div>
                   <div className="text-sm space-y-1">
                     <p>
-                      <span className="font-medium">Clase ID:</span>{' '}
-                      {recomendacion.claseId}
+                      <span className="font-medium">Clase:</span>{' '}
+                      {recomendacion.nombreClase || recomendacion.claseId}
                     </p>
                     {recomendacion.timestamp && (
                       <p>
