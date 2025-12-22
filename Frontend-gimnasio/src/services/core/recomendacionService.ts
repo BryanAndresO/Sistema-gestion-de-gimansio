@@ -24,7 +24,7 @@ export interface ConectarRecomendacionesOptions {
  * Convierte un timestamp que puede venir como array [año, mes, día, hora, minuto, segundo]
  * o como string ISO a un string ISO estándar
  */
-const convertirTimestamp = (timestamp: any): string => {
+const convertirTimestamp = (timestamp: unknown): string => {
   if (!timestamp) {
     return new Date().toISOString();
   }
