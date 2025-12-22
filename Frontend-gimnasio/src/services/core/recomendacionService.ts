@@ -51,13 +51,17 @@ const convertirTimestamp = (timestamp: unknown): string => {
     return date.toISOString();
   }
 
-  // Por defecto, intentar crear una fecha
-  try {
-    return new Date(timestamp).toISOString();
-  } catch {
-    return new Date().toISOString();
+  // Por defecto, intentar crear una fecha a partir de las propiedades del objeto si es un objeto con estructura conocida
+  if (typeof timestamp === 'object' && timestamp !== null &&
+      'year' in timestamp && 'monthValue' in timestamp && 'dayOfMonth' in timestamp) {
+    const { year, monthValue, dayOfMonth, hour = 0, minute = 0, second = 0 } = timestamp as {
+      year: number; monthValue: number; dayOfMonth: number; hour?: number; minute?: number; second?: number; };
+    const date = new Date(year, monthValue - 1, dayOfMonth, hour, minute, second);
+    return date.toISOString();
   }
-};
+
+  // Finalmente, si no se pudo convertir, retornar una fecha ISO actual
+  return new Date().toISOString();};
 
 /**
  * Conecta al endpoint SSE de recomendaciones
