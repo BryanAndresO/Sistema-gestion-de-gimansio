@@ -96,6 +96,12 @@ export const conectarRecomendaciones = (
       // El backend ahora envía RecomendacionDTO directamente
       const recomendacion: RecomendacionDTO = JSON.parse(event.data);
       
+      // Filtrar eventos heartbeat para no mostrarlos como recomendaciones reales
+      if (recomendacion.claseId === 'heartbeat') {
+        console.log('Heartbeat recibido - conexión activa');
+        return;
+      }
+      
       // Normalizar el timestamp si viene en formato array
       if (recomendacion.timestamp) {
         recomendacion.timestamp = convertirTimestamp(recomendacion.timestamp);
