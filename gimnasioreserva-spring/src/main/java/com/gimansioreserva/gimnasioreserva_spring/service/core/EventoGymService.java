@@ -47,6 +47,9 @@ public class EventoGymService {
 
                 // doOnCancel = cancelación del subscriber
                 .doOnCancel(() ->
-                        System.out.println("onCancel: Suscriptor desconectado"));
+                        System.out.println("onCancel: Suscriptor desconectado"))
+                // doOnComplete: Se ejecuta cuando el Flux se completa.
+                .doOnComplete(() ->
+                        System.out.println("onComplete: Flujo de eventos completado inesperadamente."));
     }
 }

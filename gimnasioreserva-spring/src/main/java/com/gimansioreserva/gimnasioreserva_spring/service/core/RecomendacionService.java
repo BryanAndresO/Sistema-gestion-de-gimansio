@@ -53,7 +53,9 @@ public class RecomendacionService {
                 .distinct(RecomendacionDTO::getClaseId)
                 // 4. onBackpressureLatest: Estrategia de contrapresión que mantiene solo la última señal
                 //    si el suscriptor no puede procesar los eventos tan rápido como se emiten.
-                .onBackpressureLatest();
+                .onBackpressureLatest()
+                // doOnError: Captura cualquier error en el pipeline de recomendaciones
+                .doOnError(e -> System.err.println("ERROR en RecomendacionService pipeline: " + e.getMessage()));
     }
 
     /**
