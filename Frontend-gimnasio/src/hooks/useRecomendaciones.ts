@@ -14,7 +14,8 @@ export const useRecomendaciones = () => {
   const closeConnectionRef = useRef<(() => void) | null>(null);
   const clasesIdsRef = useRef<Set<string>>(new Set());
   // Heartbeat and reconnection helpers
-  const lastMessageRef = useRef<number>(Date.now());
+  // Avoid impure initializer (Date.now()) to satisfy hooks purity lint rule
+  const lastMessageRef = useRef<number>(0);
   const reconnectionAttemptsRef = useRef<number>(0);
   const reconnectionTimerRef = useRef<number | null>(null);
   const heartbeatIntervalRef = useRef<number | null>(null);
@@ -42,8 +43,19 @@ export const useRecomendaciones = () => {
       }, delay);
     };
 
-    const isAuthError = (e: any) => {
-      const status = e?.status || e?.target?.status || e?.currentTarget?.status;
+    const getStatus = (err: unknown): number | undefined => {
+      if (typeof err !== 'object' || err === null) return undefined;
+      const obj = err as { [k: string]: unknown };
+      if (typeof obj.status === 'number') return obj.status as number;
+      const target = obj.target as { [k: string]: unknown } | undefined;
+      if (target && typeof target.status === 'number') return target.status as number;
+      const ct = obj.currentTarget as { [k: string]: unknown } | undefined;
+      if (ct && typeof ct.status === 'number') return ct.status as number;
+      return undefined;
+    };
+
+    const isAuthError = (e: unknown) => {
+      const status = getStatus(e);
       return status === 401 || status === 403;
     };
 
@@ -145,8 +157,8 @@ export const useRecomendaciones = () => {
 
     // Cleanup: cerrar conexión al desmontar el componente
     return () => {
-      const currentClasesIdsRef = clasesIdsRef.current;
-      const cleanupClasesIds = () => currentClasesIdsRef.clear();
+      const currentClasesIds = clasesIdsRef.current; // copiar el valor actual para el cleanup
+      const cleanupClasesIds = () => currentClasesIds.clear();
 
       // Marcar como desconexión manual para evitar reintentos automáticos durante desmontaje
       isManualDisconnectRef.current = true;
