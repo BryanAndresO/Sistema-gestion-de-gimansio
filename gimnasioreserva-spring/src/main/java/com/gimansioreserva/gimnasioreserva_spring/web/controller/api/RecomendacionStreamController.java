@@ -31,18 +31,13 @@ public class RecomendacionStreamController {
      * Endpoint SSE (Server-Sent Events) para transmitir recomendaciones en tiempo real.
      * Este método produce un stream de eventos de texto (`MediaType.TEXT_EVENT_STREAM_VALUE`).
      * Incluye un heartbeat cada 15 segundos para mantener la conexión activa.
-     * Soporta autenticación vía query parameter para EventSource compatibility.
+     * Sin autenticación para facilitar demostraciones.
      *
-     * @param request Objeto ServerHttpRequest para extraer el token
      * @return Un Flux de RecomendacionDTO que se enviará al cliente.
      */
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<RecomendacionDTO> streamRecomendaciones(ServerHttpRequest request) {
-        // Extraer token del query parameter
-        String token = Optional.ofNullable(request.getQueryParams().getFirst("token"))
-                .orElse(null);
-        
-        System.out.println("Nueva conexión SSE establecida" + (token != null ? " con token" : " sin token"));
+    public Flux<RecomendacionDTO> streamRecomendaciones() {
+        System.out.println("Nueva conexión SSE establecida (sin autenticación)");
         
         // Crear heartbeat más frecuente para mantener la conexión activa (cada 15 segundos)
         Flux<RecomendacionDTO> heartbeat = Flux.interval(Duration.ofSeconds(15))
