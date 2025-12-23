@@ -3,7 +3,7 @@
  * Implementa EventSource para recibir eventos en tiempo real
  */
 
-import { API_BASE_URL } from '../../utils/constants';
+import { STORAGE_KEYS, API_BASE_URL } from '../../utils/constants';
 
 export interface RecomendacionDTO {
   claseId: string;
@@ -72,12 +72,21 @@ export const conectarRecomendaciones = (
   // API_BASE_URL viene de constants.ts y usa VITE_API_BASE_URL del .env
   const apiBaseUrl = API_BASE_URL;
   
-  // Conexión SSE sin autenticación para demostración
-  const streamUrl = `${apiBaseUrl}/recomendaciones/stream`;
+  // Intentar obtener el token para autenticación (si el backend lo requiere como query param)
+  // Nota: EventSource no soporta headers, así que si necesitas autenticación,
+  // el backend debe aceptar el token como query parameter o usar cookies
+  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  
+  // Restaurar el token en la URL ahora que el backend está corregido
+  const streamUrl = token 
+    ? `${apiBaseUrl}/recomendaciones/stream?token=${encodeURIComponent(token)}`
+    : `${apiBaseUrl}/recomendaciones/stream`;
 
   console.log('Intentando conectar SSE a:', streamUrl);
+  console.log('Token disponible:', !!token);
 
   // Crear EventSource para SSE
+  // EventSource automáticamente incluye cookies si withCredentials está habilitado
   const eventSource = new EventSource(streamUrl);
 
   // Manejar mensajes recibidos
