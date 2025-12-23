@@ -12,7 +12,7 @@ import { formatRelativeTime } from '../../utils/formatters'; // Utilidad para fo
  */
 export const RecomendacionesLive: React.FC = () => {
   // Consume el hook `useRecomendaciones` para obtener las recomendaciones, el estado de la conexión y los errores.
-  const { recomendaciones, isConnected, error } = useRecomendaciones();
+  const { recomendaciones, isConnected, error, usandoPolling } = useRecomendaciones();
 
   // Función auxiliar para determinar las clases CSS de color de fondo y texto
   // basándose en la prioridad de la recomendación. Esto permite una representación visual
@@ -50,14 +50,25 @@ export const RecomendacionesLive: React.FC = () => {
     <Card title="Recomendaciones en Tiempo Real" className="mb-6">
       {/* Indicador visual del estado de la conexión SSE (conectado/desconectado) */}
       <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-gray-900">
+          Recomendaciones en Tiempo Real
+        </h3>
+        <div className="flex items-center space-x-2">
           <div
             className={`h-3 w-3 rounded-full ${
-              isConnected ? 'bg-green-500' : 'bg-gray-400' // Color verde si está conectado, gris si no.
+              isConnected
+                ? 'bg-green-500'
+                : usandoPolling
+                ? 'bg-yellow-500'
+                : 'bg-red-500'
             }`}
           />
           <span className="text-sm text-gray-600">
-            {isConnected ? 'Conectado' : 'Desconectado'} {/* Texto del estado de conexión. */}
+            {isConnected
+              ? 'Conectado'
+              : usandoPolling
+              ? 'Polling (SSE no disponible)'
+              : 'Desconectado'}
           </span>
         </div>
       </div>

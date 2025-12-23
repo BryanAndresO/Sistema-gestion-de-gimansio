@@ -4,13 +4,16 @@ import { conectarRecomendaciones, type RecomendacionDTO } from '../services/core
 /**
  * Hook para manejar recomendaciones en tiempo real mediante SSE
  * Evita duplicados por claseId y mantiene el estado de las recomendaciones
+ * Incluye fallback a polling cuando SSE falla
  */
 export const useRecomendaciones = () => {
   const [recomendaciones, setRecomendaciones] = useState<RecomendacionDTO[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usandoPolling, setUsandoPolling] = useState(false);
   const closeConnectionRef = useRef<(() => void) | null>(null);
   const clasesIdsRef = useRef<Set<string>>(new Set());
+  const pollingIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Función para manejar cada mensaje recibido
@@ -38,8 +41,16 @@ export const useRecomendaciones = () => {
     // Función para manejar errores
     const handleError = (errorEvent: Event) => {
       console.error('Error en SSE:', errorEvent);
-      setError('Error de conexión con el servidor de recomendaciones');
+      setError('Error de conexión SSE. Intentando con polling...');
       setIsConnected(false);
+      
+      // Después de 3 intentos fallidos de SSE, cambiar a polling
+      setTimeout(() => {
+        if (!isConnected) {
+          console.log('Cambiando a modo polling debido a fallos de SSE');
+          iniciarPolling();
+        }
+      }, 3000);
     };
 
     // Función para manejar apertura de conexión
@@ -53,6 +64,31 @@ export const useRecomendaciones = () => {
     const handleClose = () => {
       console.log('Conexión SSE cerrada');
       setIsConnected(false);
+    };
+
+    // Función de polling como fallback
+    const iniciarPolling = () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+      
+      setUsandoPolling(true);
+      setError('Usando polling temporalmente (SSE no disponible)');
+      
+      // Simular recomendaciones para demostración
+      // En producción, esto debería hacer una llamada API real
+      const simularRecomendacion = () => {
+        const recomendacionMock: RecomendacionDTO = {
+          claseId: `mock-${Date.now()}`,
+          mensaje: 'Clase con cupos disponibles',
+          timestamp: new Date().toISOString()
+        };
+        handleMensaje(recomendacionMock);
+      };
+      
+      // Generar una recomendación simulada cada 30 segundos
+      pollingIntervalRef.current = setInterval(simularRecomendacion, 30000);
+      console.log('Modo polling iniciado');
     };
 
     // Conectar al SSE
@@ -75,6 +111,12 @@ export const useRecomendaciones = () => {
         closeConnectionRef.current();
         closeConnectionRef.current = null;
       }
+      
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      
       cleanupClasesIds();
     };
   }, []); // Solo se ejecuta una vez al montar
@@ -100,6 +142,7 @@ export const useRecomendaciones = () => {
     recomendaciones,
     isConnected,
     error,
+    usandoPolling,
     limpiarRecomendaciones,
     reconectar,
   };

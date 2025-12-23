@@ -76,9 +76,14 @@ export const conectarRecomendaciones = (
   // Nota: EventSource no soporta headers, así que si necesitas autenticación,
   // el backend debe aceptar el token como query parameter o usar cookies
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  
+  // Restaurar el token en la URL ahora que el backend está corregido
   const streamUrl = token 
     ? `${apiBaseUrl}/recomendaciones/stream?token=${encodeURIComponent(token)}`
     : `${apiBaseUrl}/recomendaciones/stream`;
+
+  console.log('Intentando conectar SSE a:', streamUrl);
+  console.log('Token disponible:', !!token);
 
   // Crear EventSource para SSE
   // EventSource automáticamente incluye cookies si withCredentials está habilitado
@@ -89,6 +94,12 @@ export const conectarRecomendaciones = (
     try {
       // El backend ahora envía RecomendacionDTO directamente
       const recomendacion: RecomendacionDTO = JSON.parse(event.data);
+      
+      // Filtrar eventos heartbeat
+      if (recomendacion.claseId === 'heartbeat') {
+        console.log('Heartbeat recibido - conexión activa');
+        return; // No procesar heartbeat como recomendación
+      }
       
       // Normalizar el timestamp si viene en formato array
       if (recomendacion.timestamp) {
@@ -107,6 +118,12 @@ export const conectarRecomendaciones = (
   // Manejar errores
   eventSource.onerror = (error: Event) => {
     console.error('Error en conexión SSE:', error);
+    console.error('EventSource readyState:', eventSource.readyState);
+    console.error('EventSource URL:', streamUrl);
+    if (error instanceof Event && error.type === 'error') {
+      console.error('Detalles del error EventSource:', (error as any).message || 'No message available');
+    }
+    
     if (onError) {
       onError(error);
     }

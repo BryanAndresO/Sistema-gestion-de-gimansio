@@ -8,6 +8,8 @@ import com.gimansioreserva.gimnasioreserva_spring.service.core.RecomendacionServ
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux; // Importa Flux de Project Reactor para manejo de flujos reactivos.
+import reactor.core.publisher.Mono; // Importa Mono para operaciones reactivas
+import java.time.Duration; // Importa Duration para el heartbeat
 
 @RestController
 @RequestMapping("/api/recomendaciones") // Define el prefijo de la URL para este controlador.
@@ -26,16 +28,41 @@ public class RecomendacionStreamController {
     /**
      * Endpoint SSE (Server-Sent Events) para transmitir recomendaciones en tiempo real.
      * Este método produce un stream de eventos de texto (`MediaType.TEXT_EVENT_STREAM_VALUE`).
+     * Incluye un heartbeat cada 30 segundos para mantener la conexión activa.
      *
      * @return Un Flux de RecomendacionDTO que se enviará al cliente.
      */
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<RecomendacionDTO> streamRecomendaciones() {
+        System.out.println("Nueva conexión SSE establecida");
+        
+        // Crear heartbeat para mantener la conexión activa
+        Flux<RecomendacionDTO> heartbeat = Flux.interval(Duration.ofSeconds(30))
+                .map(tick -> new RecomendacionDTO(
+                        "heartbeat",
+                        "Sistema",
+                        "Conexión activa",
+                        0,
+                        java.time.LocalDateTime.now()
+                ));
+        
         // Se conecta al flujo de eventos del gimnasio y luego utiliza el servicio de recomendaciones
         // para transformar estos eventos en un flujo de DTOs de recomendaciones.
-        return recomendacionService.generar(
+        Flux<RecomendacionDTO> recomendaciones = recomendacionService.generar(
                 eventoGymService.flujoEventos()
         );
+        
+        // Combinar el flujo de recomendaciones con el heartbeat
+        return Flux.merge(recomendaciones, heartbeat)
+                .doOnSubscribe(subscription -> {
+                    System.out.println("Cliente suscrito al stream SSE");
+                })
+                .doOnComplete(() -> {
+                    System.out.println("Stream SSE completado");
+                })
+                .doOnError(error -> {
+                    System.err.println("Error en stream SSE: " + error.getMessage());
+                });
     }
 
     /**
