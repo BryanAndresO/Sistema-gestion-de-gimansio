@@ -53,10 +53,11 @@ public class RecomendacionService {
                     } catch (NumberFormatException e) {
                         // Si claseId no es un número válido, crear recomendación genérica
                         System.out.println("claseId no numérico, creando recomendación genérica: " + evento.getClaseId());
+                        String nombreAmigable = generarNombreAmigable(evento.getClaseId());
                         return Mono.just(new RecomendacionDTO(
                                 evento.getClaseId(),
-                                evento.getClaseId(), // Usar claseId como nombre
-                                generarMensaje(evento, evento.getClaseId()),
+                                nombreAmigable,
+                                generarMensaje(evento, nombreAmigable),
                                 generarPrioridad(evento.getTipo()),
                                 evento.getTimestamp()
                         ));
@@ -79,14 +80,57 @@ public class RecomendacionService {
      * @return El mensaje de la recomendación.
      */
     private String generarMensaje(EventoGym evento, String nombreClase) {
-        String baseMensaje = switch (evento.getTipo()) {
-            case CUPO_DISPONIBLE -> "¡Cupo disponible!";
-            case CLASE_LLENA -> "Clase llena.";
-            case CAMBIO_HORARIO -> "Cambio de horario.";
-            case RESERVA_CREADA -> "Reserva creada.";
-            case RESERVA_CANCELADA -> "Reserva cancelada.";
+        return switch (evento.getTipo()) {
+            case CUPO_DISPONIBLE -> String.format("¡Cupo disponible en %s! Reserva ahora antes de que se ocupe.", nombreClase);
+            case CLASE_LLENA -> String.format("Clase %s está llena. Prueba otra clase o espera un cupo.", nombreClase);
+            case CAMBIO_HORARIO -> String.format("Cambio de horario en %s. Verifica tu agenda para no perdértela.", nombreClase);
+            case RESERVA_CREADA -> String.format("Reserva confirmada para %s. ¡Te esperamos!", nombreClase);
+            case RESERVA_CANCELADA -> String.format("Se liberó un cupo en %s. ¡Aprovecha la oportunidad!", nombreClase);
         };
-        return baseMensaje + " en la clase " + nombreClase + ".";
+    }
+
+    /**
+     * Genera un nombre amigable para la clase a partir del claseId.
+     *
+     * @param claseId El identificador de la clase.
+     * @return Un nombre legible para la clase.
+     */
+    private String generarNombreAmigable(String claseId) {
+        if (claseId == null) return "Clase Desconocida";
+        
+        // Convertir códigos como "YOGA-101" a "Yoga"
+        if (claseId.contains("-")) {
+            String[] partes = claseId.split("-");
+            if (partes.length > 0) {
+                String tipo = partes[0];
+                return switch (tipo.toUpperCase()) {
+                    case "YOGA" -> "Yoga";
+                    case "PILATES" -> "Pilates";
+                    case "SPINNING" -> "Spinning";
+                    case "BOX" -> "Boxeo";
+                    case "ZUMBA" -> "Zumba";
+                    case "CROSSFIT" -> "CrossFit";
+                    case "HIIT" -> "HIIT";
+                    case "KICKBOXING" -> "Kickboxing";
+                    case "AEROBIC" -> "Aeróbicos";
+                    case "DANCE" -> "Danza";
+                    case "MEDITATION" -> "Meditación";
+                    case "STRETCHING" -> "Estiramientos";
+                    case "FUNCTIONAL" -> "Entrenamiento Funcional";
+                    case "CALISTHENICS" -> "Calistenia";
+                    case "WELLNESS" -> "Wellness";
+                    default -> tipo.substring(0, 1).toUpperCase() + tipo.substring(1).toLowerCase();
+                };
+            }
+        }
+        
+        // Si es numérico, buscar en base de datos o usar genérico
+        try {
+            Long.parseLong(claseId);
+            return "Clase " + claseId;
+        } catch (NumberFormatException e) {
+            return claseId.substring(0, 1).toUpperCase() + claseId.substring(1).toLowerCase();
+        }
     }
 
     /**
