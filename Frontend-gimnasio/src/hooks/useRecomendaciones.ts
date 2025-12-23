@@ -104,8 +104,8 @@ export const useRecomendaciones = () => {
 
     // Cleanup: cerrar conexión al desmontar el componente
     return () => {
-      const currentClasesIdsRef = clasesIdsRef.current;
-      const cleanupClasesIds = () => currentClasesIdsRef.clear();
+      const currentClasesIds = clasesIdsRef.current;
+      const cleanupClasesIds = () => currentClasesIds.clear();
 
       if (closeConnectionRef.current) {
         closeConnectionRef.current();
@@ -119,7 +119,7 @@ export const useRecomendaciones = () => {
       
       cleanupClasesIds();
     };
-  }, []); // Solo se ejecuta una vez al montar
+  }, [isConnected]); // Agregar isConnected como dependencia para el efecto de reconexión
 
   // Función para limpiar recomendaciones manualmente
   const limpiarRecomendaciones = () => {

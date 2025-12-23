@@ -121,7 +121,7 @@ export const conectarRecomendaciones = (
     console.error('EventSource readyState:', eventSource.readyState);
     console.error('EventSource URL:', streamUrl);
     if (error instanceof Event && error.type === 'error') {
-      console.error('Detalles del error EventSource:', (error as any).message || 'No message available');
+      console.error('Detalles del error EventSource:', (error as Event & { message?: string }).message || 'No message available');
     }
     
     if (onError) {
