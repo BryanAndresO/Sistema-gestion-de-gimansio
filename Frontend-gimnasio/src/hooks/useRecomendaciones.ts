@@ -3,8 +3,7 @@ import { conectarRecomendaciones, type RecomendacionDTO } from '../services/core
 
 /**
  * Hook para manejar recomendaciones en tiempo real mediante SSE
- * Evita duplicados por claseId y mantiene el estado de las recomendaciones
- * Incluye fallback a polling cuando SSE falla
+ * Implementado con reconexión automática robusta y manejo de errores experto
  */
 export const useRecomendaciones = () => {
   const [recomendaciones, setRecomendaciones] = useState<RecomendacionDTO[]>([]);
@@ -14,11 +13,18 @@ export const useRecomendaciones = () => {
   const closeConnectionRef = useRef<(() => void) | null>(null);
   const clasesIdsRef = useRef<Set<string>>(new Set());
   const pollingIntervalRef = useRef<number | null>(null);
+  const reconnectTimeoutRef = useRef<number | null>(null);
+  const reconnectAttemptsRef = useRef(0);
 
   useEffect(() => {
     // Función para manejar cada mensaje recibido
     const handleMensaje = (recomendacion: RecomendacionDTO) => {
       // Evitar duplicados por claseId
+      if (recomendacion.claseId === 'heartbeat') {
+        console.log('Heartbeat recibido - conexión activa');
+        return;
+      }
+
       if (clasesIdsRef.current.has(recomendacion.claseId)) {
         console.log('Recomendación duplicada ignorada:', recomendacion.claseId);
         return;
@@ -29,28 +35,39 @@ export const useRecomendaciones = () => {
 
       // Agregar la recomendación al estado
       setRecomendaciones((prev) => {
-        // Verificar nuevamente en el estado para evitar duplicados en actualizaciones concurrentes
         const existe = prev.some((r) => r.claseId === recomendacion.claseId);
         if (existe) {
           return prev;
         }
         return [...prev, recomendacion];
       });
+
+      // Resetear contador de reconexiones exitosas
+      reconnectAttemptsRef.current = 0;
     };
 
-    // Función para manejar errores
+    // Función para manejar errores con reconexión exponencial
     const handleError = (errorEvent: Event) => {
       console.error('Error en SSE:', errorEvent);
-      setError('Error de conexión SSE. Intentando con polling...');
       setIsConnected(false);
       
-      // Después de 3 intentos fallidos de SSE, cambiar a polling
-      setTimeout(() => {
-        if (!isConnected) {
-          console.log('Cambiando a modo polling debido a fallos de SSE');
-          iniciarPolling();
-        }
-      }, 3000);
+      // Implementar reconexión exponencial backoff
+      const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+      reconnectAttemptsRef.current++;
+      
+      setError(`Error de conexión. Reintentando en ${delay/1000}s... (Intento ${reconnectAttemptsRef.current})`);
+      
+      // Limpiar timeout anterior
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      
+      // Programar reconexión
+      reconnectTimeoutRef.current = window.setTimeout(() => {
+        console.log(`Intentando reconexión SSE #${reconnectAttemptsRef.current}`);
+        setError(null);
+        conectarSSE();
+      }, delay);
     };
 
     // Función para manejar apertura de conexión
@@ -58,55 +75,45 @@ export const useRecomendaciones = () => {
       console.log('Conexión SSE establecida');
       setIsConnected(true);
       setError(null);
+      setUsandoPolling(false);
+      
+      // Limpiar timeout de reconexión si existe
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
     };
 
     // Función para manejar cierre de conexión
     const handleClose = () => {
       console.log('Conexión SSE cerrada');
       setIsConnected(false);
+      
+      // No hacer polling inmediatamente, esperar al manejo de errores
     };
 
-    // Función de polling como fallback
-    const iniciarPolling = () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
+    // Función para conectar SSE
+    const conectarSSE = () => {
+      // Cerrar conexión existente
+      if (closeConnectionRef.current) {
+        closeConnectionRef.current();
       }
       
-      setUsandoPolling(true);
-      setError('Usando polling temporalmente (SSE no disponible)');
-      
-      // Simular recomendaciones para demostración
-      // En producción, esto debería hacer una llamada API real
-      const simularRecomendacion = () => {
-        const recomendacionMock: RecomendacionDTO = {
-          claseId: `mock-${Date.now()}`,
-          mensaje: 'Clase con cupos disponibles',
-          timestamp: new Date().toISOString()
-        };
-        handleMensaje(recomendacionMock);
-      };
-      
-      // Generar una recomendación simulada cada 30 segundos
-      pollingIntervalRef.current = setInterval(simularRecomendacion, 30000);
-      console.log('Modo polling iniciado');
+      const close = conectarRecomendaciones({
+        onMensaje: handleMensaje,
+        onError: handleError,
+        onOpen: handleOpen,
+        onClose: handleClose,
+      });
+
+      closeConnectionRef.current = close;
     };
 
-    // Conectar al SSE
-    const close = conectarRecomendaciones({
-      onMensaje: handleMensaje,
-      onError: handleError,
-      onOpen: handleOpen,
-      onClose: handleClose,
-    });
+    // Iniciar conexión
+    conectarSSE();
 
-    // Guardar la función de cierre
-    closeConnectionRef.current = close;
-
-    // Cleanup: cerrar conexión al desmontar el componente
+    // Cleanup al desmontar
     return () => {
-      const currentClasesIds = clasesIdsRef.current;
-      const cleanupClasesIds = () => currentClasesIds.clear();
-
       if (closeConnectionRef.current) {
         closeConnectionRef.current();
         closeConnectionRef.current = null;
@@ -117,9 +124,14 @@ export const useRecomendaciones = () => {
         pollingIntervalRef.current = null;
       }
       
-      cleanupClasesIds();
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      
+      clasesIdsRef.current.clear();
     };
-  }, [isConnected]); // Agregar isConnected como dependencia para el efecto de reconexión
+  }, []); // Sin dependencias para evitar reconexiones infinitas
 
   // Función para limpiar recomendaciones manualmente
   const limpiarRecomendaciones = () => {
@@ -129,13 +141,19 @@ export const useRecomendaciones = () => {
 
   // Función para reconectar manualmente
   const reconectar = () => {
+    reconnectAttemptsRef.current = 0;
+    setError(null);
+    
     if (closeConnectionRef.current) {
       closeConnectionRef.current();
     }
-    setError(null);
-    // El useEffect se ejecutará nuevamente si cambiamos alguna dependencia
-    // Por ahora, simplemente cerramos y dejamos que se reconecte automáticamente
-    // o el usuario puede recargar la página
+    
+    // Forzar reconexión inmediata
+    setTimeout(() => {
+      if (closeConnectionRef.current) {
+        closeConnectionRef.current();
+      }
+    }, 100);
   };
 
   return {

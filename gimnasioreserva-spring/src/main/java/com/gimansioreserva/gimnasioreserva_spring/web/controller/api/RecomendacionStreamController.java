@@ -44,35 +44,35 @@ public class RecomendacionStreamController {
         
         System.out.println("Nueva conexión SSE establecida" + (token != null ? " con token" : " sin token"));
         
-        // Crear heartbeat más frecuente para mantener la conexión activa (cada 15 segundos)
-        Flux<RecomendacionDTO> heartbeat = Flux.interval(Duration.ofSeconds(15))
-                .map(tick -> new RecomendacionDTO(
-                        "heartbeat",
-                        "Sistema",
-                        "Conexión activa",
-                        0,
-                        java.time.LocalDateTime.now()
-                ))
-                .log("heartbeat"); // Log para debugging del heartbeat
-        
-        // Se conecta al flujo de eventos del gimnasio y luego utiliza el servicio de recomendaciones
-        // para transformar estos eventos en un flujo de DTOs de recomendaciones.
-        Flux<RecomendacionDTO> recomendaciones = recomendacionService.generar(
-                eventoGymService.flujoEventos()
-        ).log("recomendaciones"); // Log para debugging de recomendaciones
-        
-        // Combinar el flujo de recomendaciones con el heartbeat
-        return Flux.merge(recomendaciones, heartbeat)
+        // Stream infinito que nunca se completa - ESTA ES LA SOLUCIÓN CLAVE
+        return Flux.never()
+                .mergeWith(
+                    // Heartbeat cada 10 segundos para mantener conexión activa
+                    Flux.interval(Duration.ofSeconds(10))
+                            .map(tick -> new RecomendacionDTO(
+                                    "heartbeat",
+                                    "Sistema",
+                                    "Conexión activa",
+                                    0,
+                                    java.time.LocalDateTime.now()
+                            ))
+                )
+                .mergeWith(
+                    // Stream de recomendaciones que se combina con el stream infinito
+                    recomendacionService.generar(eventoGymService.flujoEventos())
+                            .doOnNext(rec -> System.out.println("Recomendación emitida: " + rec.getClaseId()))
+                )
                 .doOnSubscribe(subscription -> {
-                    System.out.println("Cliente suscrito al stream SSE");
+                    System.out.println("Cliente suscrito al stream SSE INFINITO");
                 })
-                .doOnComplete(() -> {
-                    System.out.println("Stream SSE completado");
+                .doOnCancel(() -> {
+                    System.out.println("Cliente canceló la suscripción SSE");
                 })
                 .doOnError(error -> {
                     System.err.println("Error en stream SSE: " + error.getMessage());
+                    // NO completar el stream, solo loggear el error
                 })
-                .log("stream-merge"); // Log general del stream
+                .log("sse-stream"); // Log para debugging
     }
 
     /**
