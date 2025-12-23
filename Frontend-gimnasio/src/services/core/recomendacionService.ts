@@ -86,7 +86,9 @@ export const conectarRecomendaciones = (
 
   // Crear EventSource para SSE
   // EventSource automáticamente incluye cookies si withCredentials está habilitado
-  const eventSource = new EventSource(streamUrl);
+  const eventSource = new EventSource(streamUrl, {
+    withCredentials: true // Importante para CORS
+  });
 
   // Manejar mensajes recibidos
   eventSource.onmessage = (event: MessageEvent) => {
