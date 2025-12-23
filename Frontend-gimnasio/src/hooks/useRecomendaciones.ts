@@ -28,14 +28,14 @@ export const useRecomendaciones = () => {
       setRecomendaciones((prev) => {
         // Verificar nuevamente en el estado para evitar duplicados en actualizaciones concurrentes
         const existe = prev.some((r) => r.claseId === recomendacion.claseId);
-        if (existe) {
-          return prev;
+        if (!existe) {
+          return [...prev, recomendacion];
         }
-        return [...prev, recomendacion];
+        return prev;
       });
     };
 
-    // Función para manejar errores
+    // Función para manejar errores de conexión
     const handleError = (errorEvent: Event) => {
       console.error('Error en SSE:', errorEvent);
       setError('Error de conexión con el servidor de recomendaciones');
@@ -68,16 +68,14 @@ export const useRecomendaciones = () => {
 
     // Cleanup: cerrar conexión al desmontar el componente
     return () => {
-      const currentClasesIdsRef = clasesIdsRef.current;
-      const cleanupClasesIds = () => currentClasesIdsRef.clear();
-
       if (closeConnectionRef.current) {
         closeConnectionRef.current();
         closeConnectionRef.current = null;
       }
-      cleanupClasesIds();
+      // Limpiar referencias
+      clasesIdsRef.current.clear();
     };
-  }, []); // Solo se ejecuta una vez al montar
+  }, []); // Array vacío para que solo se ejecute una vez al montar
 
   // Función para limpiar recomendaciones manualmente
   const limpiarRecomendaciones = () => {
