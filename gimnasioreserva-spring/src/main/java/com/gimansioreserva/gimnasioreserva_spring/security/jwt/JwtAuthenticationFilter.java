@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -20,6 +22,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenBlacklist jwtTokenBlacklist;
     private final UserDetailsServiceImpl userDetailsService;
+
+    // Lista de URLs que no requieren autenticación JWT
+    private static final List<String> EXCLUDED_URLS = Arrays.asList(
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/password-reset",
+            "/api/recomendaciones/stream",
+            "/api/recomendaciones/simular",
+            "/swagger-ui/index.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
+    );
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
                                    JwtTokenBlacklist jwtTokenBlacklist,
@@ -34,6 +48,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+
+        // Si la URL es una de las excluidas, no procesamos el JWT y pasamos al siguiente filtro.
+        if (EXCLUDED_URLS.stream().anyMatch(url -> request.getRequestURI().startsWith(url))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String token = null;
 
