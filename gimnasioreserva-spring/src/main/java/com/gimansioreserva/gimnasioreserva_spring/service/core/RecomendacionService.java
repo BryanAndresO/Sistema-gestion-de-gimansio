@@ -38,17 +38,25 @@ public class RecomendacionService {
                 // 2. flatMap: Transforma cada evento filtrado en una RecomendacionDTO.
                 //    Se utiliza flatMap para realizar una operación asíncrona (buscar la clase por ID)
                 //    y aplanar los Mono resultantes en un único Flux.
-                .flatMap(evento ->
-                    // Busca la clase por ID. Mono.justOrEmpty maneja el caso de que la clase no exista.
-                    Mono.justOrEmpty(claseRepository.findById(Long.parseLong(evento.getClaseId())))
-                            .map(clase -> new RecomendacionDTO(
-                                    evento.getClaseId(),
-                                    clase.getNombre(), // Se obtiene el nombre de la clase para el DTO.
-                                    generarMensaje(evento, clase.getNombre()), // Se genera el mensaje usando el nombre de la clase.
-                                    generarPrioridad(evento.getTipo()),
-                                    evento.getTimestamp()
-                            ))
-                )
+                .flatMap(evento -> {
+                    try {
+                        // Intenta parsear claseId a Long y buscar la clase.
+                        return Mono.justOrEmpty(claseRepository.findById(Long.parseLong(evento.getClaseId())))
+                                .map(clase -> new RecomendacionDTO(
+                                        evento.getClaseId(),
+                                        clase.getNombre(),
+                                        generarMensaje(evento, clase.getNombre()),
+                                        generarPrioridad(evento.getTipo()),
+                                        evento.getTimestamp()
+                                ));
+                    } catch (NumberFormatException e) {
+                        // Si claseId no es un número válido, registra el error y devuelve un Mono.empty()
+                        // para que este evento sea ignorado y no rompa el stream.
+                        System.err.println("ERROR: claseId inválido para parseo Long en EventoGym: " +
+                                evento.getClaseId() + ". Mensaje: " + e.getMessage());
+                        return Mono.empty();
+                    }
+                })
                 // 3. distinct: Asegura que solo se emita una recomendación por claseId, evitando duplicados en un corto periodo.
                 .distinct(RecomendacionDTO::getClaseId)
                 // 4. onBackpressureLatest: Estrategia de contrapresión que mantiene solo la última señal
