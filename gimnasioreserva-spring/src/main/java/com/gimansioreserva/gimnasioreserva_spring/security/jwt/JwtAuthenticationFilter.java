@@ -50,9 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         // Si la URL es una de las excluidas, no procesamos el JWT y pasamos al siguiente filtro.
-        String requestURI = request.getRequestURI();
-        if (EXCLUDED_URLS.stream().anyMatch(url -> requestURI.equals(url) || requestURI.startsWith(url))) {
-            System.out.println("URL excluida de autenticación JWT: " + requestURI);
+        if (EXCLUDED_URLS.stream().anyMatch(url -> request.getRequestURI().startsWith(url))) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -50,13 +50,10 @@ export const RecomendacionesLive: React.FC = () => {
     <Card title="Recomendaciones en Tiempo Real" className="mb-6">
       {/* Indicador visual del estado de la conexión SSE (conectado/desconectado) */}
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Recomendaciones en Tiempo Real
-        </h3>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <div
             className={`h-3 w-3 rounded-full ${
-              isConnected ? 'bg-green-500' : 'bg-red-500'
+              isConnected ? 'bg-green-500' : 'bg-gray-400' // Color verde si está conectado, gris si no.
             }`}
           />
           <span className="text-sm text-gray-600">

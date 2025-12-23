@@ -76,19 +76,17 @@ export const conectarRecomendaciones = (
   // Nota: EventSource no soporta headers, así que si necesitas autenticación,
   // el backend debe aceptar el token como query parameter o usar cookies
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-  
-  // Temporalmente no enviar token para evitar error 401
-  const streamUrl = `${apiBaseUrl}/recomendaciones/stream`;
-
-  console.log('Intentando conectar SSE a:', streamUrl);
-  console.log('Token disponible:', !!token);
-  console.log('Modo temporal: Conectando sin token para evitar 401');
+  const streamUrl = token 
+    ? `${apiBaseUrl}/recomendaciones/stream?token=${encodeURIComponent(token)}`
+    : `${apiBaseUrl}/recomendaciones/stream`;
 
   // Crear EventSource para SSE
   // EventSource automáticamente incluye cookies si withCredentials está habilitado
   const eventSource = new EventSource(streamUrl, {
     withCredentials: true // Importante para CORS
   });
+
+  console.log('EventSource creado con withCredentials:', true);
 
   // Manejar mensajes recibidos
   eventSource.onmessage = (event: MessageEvent) => {
@@ -119,9 +117,6 @@ export const conectarRecomendaciones = (
   // Manejar errores
   eventSource.onerror = (error: Event) => {
     console.error('Error en conexión SSE:', error);
-    console.error('EventSource readyState:', eventSource.readyState);
-    console.error('EventSource URL:', streamUrl);
-    
     if (onError) {
       onError(error);
     }
