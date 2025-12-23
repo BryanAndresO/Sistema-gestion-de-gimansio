@@ -9,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux; // Importa Flux de Project Reactor para manejo de flujos reactivos.
-import reactor.core.publisher.Mono; // Importa Mono para operaciones reactivas
 import java.time.Duration; // Importa Duration para el heartbeat
 import java.util.Optional;
 
@@ -45,8 +44,7 @@ public class RecomendacionStreamController {
         System.out.println("Nueva conexión SSE establecida" + (token != null ? " con token" : " sin token"));
         
         // Stream infinito que nunca se completa - ESTA ES LA SOLUCIÓN CLAVE
-        return Flux.never()
-                .mergeWith(
+        return Flux.merge(
                     // Heartbeat cada 10 segundos para mantener conexión activa
                     Flux.interval(Duration.ofSeconds(10))
                             .map(tick -> new RecomendacionDTO(
@@ -55,9 +53,7 @@ public class RecomendacionStreamController {
                                     "Conexión activa",
                                     0,
                                     java.time.LocalDateTime.now()
-                            ))
-                )
-                .mergeWith(
+                            )),
                     // Stream de recomendaciones que se combina con el stream infinito
                     recomendacionService.generar(eventoGymService.flujoEventos())
                             .doOnNext(rec -> System.out.println("Recomendación emitida: " + rec.getClaseId()))
