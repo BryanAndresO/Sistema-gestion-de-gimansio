@@ -6,12 +6,10 @@ import com.gimansioreserva.gimnasioreserva_spring.dto.core.RecomendacionDTO;
 import com.gimansioreserva.gimnasioreserva_spring.service.core.EventoGymService;
 import com.gimansioreserva.gimnasioreserva_spring.service.core.RecomendacionService;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux; // Importa Flux de Project Reactor para manejo de flujos reactivos.
 import reactor.core.publisher.Mono; // Importa Mono para operaciones reactivas
 import java.time.Duration; // Importa Duration para el heartbeat
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/recomendaciones") // Define el prefijo de la URL para este controlador.

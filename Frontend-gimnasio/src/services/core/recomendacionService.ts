@@ -3,7 +3,7 @@
  * Implementa EventSource para recibir eventos en tiempo real
  */
 
-import { STORAGE_KEYS, API_BASE_URL } from '../../utils/constants';
+import { API_BASE_URL } from '../../utils/constants';
 
 export interface RecomendacionDTO {
   claseId: string;
