@@ -36,21 +36,22 @@ public class RecomendacionStreamController {
     public Flux<RecomendacionDTO> streamRecomendaciones() {
         System.out.println("Nueva conexión SSE establecida");
         
-        // Crear heartbeat para mantener la conexión activa
-        Flux<RecomendacionDTO> heartbeat = Flux.interval(Duration.ofSeconds(30))
+        // Crear heartbeat más frecuente para mantener la conexión activa (cada 15 segundos)
+        Flux<RecomendacionDTO> heartbeat = Flux.interval(Duration.ofSeconds(15))
                 .map(tick -> new RecomendacionDTO(
                         "heartbeat",
                         "Sistema",
                         "Conexión activa",
                         0,
                         java.time.LocalDateTime.now()
-                ));
+                ))
+                .log("heartbeat"); // Log para debugging del heartbeat
         
         // Se conecta al flujo de eventos del gimnasio y luego utiliza el servicio de recomendaciones
         // para transformar estos eventos en un flujo de DTOs de recomendaciones.
         Flux<RecomendacionDTO> recomendaciones = recomendacionService.generar(
                 eventoGymService.flujoEventos()
-        );
+        ).log("recomendaciones"); // Log para debugging de recomendaciones
         
         // Combinar el flujo de recomendaciones con el heartbeat
         return Flux.merge(recomendaciones, heartbeat)
@@ -62,7 +63,8 @@ public class RecomendacionStreamController {
                 })
                 .doOnError(error -> {
                     System.err.println("Error en stream SSE: " + error.getMessage());
-                });
+                })
+                .log("stream-merge"); // Log general del stream
     }
 
     /**
