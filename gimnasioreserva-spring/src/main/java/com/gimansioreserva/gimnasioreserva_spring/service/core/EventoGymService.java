@@ -38,11 +38,11 @@ public class EventoGymService {
                 .doOnNext(evento ->
                         System.out.println("onNext: Evento emitido -> " + evento.getTipo()))
 
-                // onError + recuperación
-                .onErrorResume(error -> {
-                    System.out.println("onError (Publisher): " + error.getMessage());
-                    System.out.println("Recuperación activa: manteniendo flujo vivo");
-                    return Flux.empty();
+                // doOnError: Registra errores sin terminar el flujo.
+                .doOnError(error -> {
+                    System.err.println("ERROR (Publisher): " + error.getMessage());
+                    // Aquí puedes añadir lógica de reintento o manejo de errores específicos
+                    // Pero no completamos el Flux con empty, permitimos que intente continuar.
                 })
 
                 // doOnCancel = cancelación del subscriber
