@@ -72,7 +72,6 @@ public class RecomendacionStreamController {
      */
     @PostMapping("/simular")
     public void simularEvento(@RequestBody EmitirEventoRequest request) {
-        System.out.println("Endpoint /simular recibido: " + request.getClaseId() + " - " + request.getTipo());
 
         // Crea un objeto EventoGym a partir de los datos de la solicitud.
         EventoGym evento = new EventoGym(
@@ -80,11 +79,7 @@ public class RecomendacionStreamController {
                 request.getTipo()
         );
 
-        System.out.println("EventoGym creado: " + evento.getClaseId() + " - " + evento.getTipo());
-
         // Emite el evento simulado a través del servicio de eventos.
         eventoGymService.emitirEvento(evento);
-        
-        System.out.println("Evento emitido a EventoGymService");
     }
 }
