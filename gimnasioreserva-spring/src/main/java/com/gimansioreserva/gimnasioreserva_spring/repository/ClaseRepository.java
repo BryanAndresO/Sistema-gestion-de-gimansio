@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ClaseRepository extends JpaRepository<Clase, Long> {
@@ -46,7 +45,4 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
     // Clases con cupos agotados
     @Query("SELECT c FROM Clase c WHERE SIZE(c.reservas) >= c.cupo AND c.activo = true")
     List<Clase> obtenerClasesConCuposAgotados();
-
-    // Buscar clase por identificador (String)
-    Optional<Clase> findByClaseId(String claseId);
 }
