@@ -1,8 +1,7 @@
 package com.gimansioreserva.gimnasioreserva_spring;
 
-import com.gimansioreserva.gimnasioreserva_spring.domain.Clase;
-import com.gimansioreserva.gimnasioreserva_spring.domain.Reserva;
-import com.gimansioreserva.gimnasioreserva_spring.domain.Usuario;
+import com.gimansioreserva.gimnasioreserva_spring.domain.*;
+import com.gimansioreserva.gimnasioreserva_spring.dto.core.ReservaDTO;
 import com.gimansioreserva.gimnasioreserva_spring.exception.ClaseNoDisponibleException;
 import com.gimansioreserva.gimnasioreserva_spring.exception.ReservaDuplicadaException;
 import com.gimansioreserva.gimnasioreserva_spring.mapper.ReservaMapper;
@@ -14,11 +13,12 @@ import com.gimansioreserva.gimnasioreserva_spring.service.core.ReservaService;
 import com.gimansioreserva.gimnasioreserva_spring.validator.ReservaValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class ReservaServiceTest {
@@ -117,5 +117,54 @@ public class ReservaServiceTest {
 
         verifyNoInteractions(reservaMapper, reservaValidator, eventoGymService);
     }
+
+    @Test
+    void crearReserva_valid_shouldSaveReserva_returnDTO_andEmit_RESERVA_CREADA() {
+        // Arrange
+        Long idUsuario = 1L;
+        Long idClase = 10L;
+
+        Usuario usuario = mock(Usuario.class);
+        when(usuario.getIdUsuario()).thenReturn(idUsuario);
+
+        Clase clase = mock(Clase.class);
+        when(clase.getIdClase()).thenReturn(idClase);
+        when(clase.getCuposDisponibles()).thenReturn(5); // No se llena
+        when(clase.getHorario()).thenReturn(LocalDateTime.now().plusDays(1));
+
+        when(usuarioRepository.findById(idUsuario)).thenReturn(Optional.of(usuario));
+        when(claseRepository.findById(idClase)).thenReturn(Optional.of(clase));
+        when(reservaRepository.buscarReservaDuplicada(idUsuario, idClase)).thenReturn(Optional.empty());
+
+        when(reservaRepository.save(any(Reserva.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        ReservaDTO dto = new ReservaDTO();
+        when(reservaMapper.toDTO(any(Reserva.class))).thenReturn(dto);
+
+        ArgumentCaptor<Reserva> reservaCaptor = ArgumentCaptor.forClass(Reserva.class);
+        ArgumentCaptor<EventoGym> eventoCaptor = ArgumentCaptor.forClass(EventoGym.class);
+
+        // Act
+        ReservaDTO result = reservaService.crearReserva(idUsuario, idClase);
+
+        // Assert
+        assertNotNull(result);
+
+        // Debe validar y guardar
+        verify(reservaValidator).validarCrearReserva(any(Reserva.class), eq(clase));
+        verify(reservaRepository).save(reservaCaptor.capture());
+
+        Reserva guardada = reservaCaptor.getValue();
+        assertNotNull(guardada.getUsuario());
+        assertNotNull(guardada.getClase());
+        assertNotNull(guardada.getFechaReserva());
+        assertEquals("CONFIRMADA", guardada.getEstado());
+
+        // Debe emitir evento RESERVA_CREADA
+        verify(eventoGymService, times(1)).emitirEvento(eventoCaptor.capture());
+        EventoGym eventoEmitido = eventoCaptor.getValue();
+        assertEquals(TipoEvento.RESERVA_CREADA, eventoEmitido.getTipo());
+    }
+
 
 }
