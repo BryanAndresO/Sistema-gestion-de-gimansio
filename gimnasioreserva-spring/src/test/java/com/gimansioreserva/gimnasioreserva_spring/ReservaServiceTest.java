@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -164,6 +165,40 @@ public class ReservaServiceTest {
         verify(eventoGymService, times(1)).emitirEvento(eventoCaptor.capture());
         EventoGym eventoEmitido = eventoCaptor.getValue();
         assertEquals(TipoEvento.RESERVA_CREADA, eventoEmitido.getTipo());
+    }
+
+    @Test
+    void crearReserva_whenLastSpot_shouldEmit_RESERVA_CREADA_and_CLASE_LLENA() {
+        // Arrange
+        Long idUsuario = 1L;
+        Long idClase = 10L;
+
+        Usuario usuario = mock(Usuario.class);
+        when(usuario.getIdUsuario()).thenReturn(idUsuario);
+
+        Clase clase = mock(Clase.class);
+        when(clase.getIdClase()).thenReturn(idClase);
+        when(clase.getCuposDisponibles()).thenReturn(1); // (1 - 1 == 0) -> se llena
+        when(clase.getHorario()).thenReturn(LocalDateTime.now().plusDays(1));
+
+        when(usuarioRepository.findById(idUsuario)).thenReturn(Optional.of(usuario));
+        when(claseRepository.findById(idClase)).thenReturn(Optional.of(clase));
+        when(reservaRepository.buscarReservaDuplicada(idUsuario, idClase)).thenReturn(Optional.empty());
+
+        when(reservaRepository.save(any(Reserva.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(reservaMapper.toDTO(any(Reserva.class))).thenReturn(new ReservaDTO());
+
+        ArgumentCaptor<EventoGym> eventoCaptor = ArgumentCaptor.forClass(EventoGym.class);
+
+        // Act
+        reservaService.crearReserva(idUsuario, idClase);
+
+        // Assert: se emiten 2 eventos (RESERVA_CREADA y CLASE_LLENA)
+        verify(eventoGymService, times(2)).emitirEvento(eventoCaptor.capture());
+        List<EventoGym> eventos = eventoCaptor.getAllValues();
+
+        assertTrue(eventos.stream().anyMatch(e -> e.getTipo() == TipoEvento.RESERVA_CREADA));
+        assertTrue(eventos.stream().anyMatch(e -> e.getTipo() == TipoEvento.CLASE_LLENA));
     }
 
 
