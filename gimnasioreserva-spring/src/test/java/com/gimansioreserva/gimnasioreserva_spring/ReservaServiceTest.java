@@ -1,7 +1,10 @@
 package com.gimansioreserva.gimnasioreserva_spring;
 
+import com.gimansioreserva.gimnasioreserva_spring.domain.Clase;
+import com.gimansioreserva.gimnasioreserva_spring.domain.Reserva;
 import com.gimansioreserva.gimnasioreserva_spring.domain.Usuario;
 import com.gimansioreserva.gimnasioreserva_spring.exception.ClaseNoDisponibleException;
+import com.gimansioreserva.gimnasioreserva_spring.exception.ReservaDuplicadaException;
 import com.gimansioreserva.gimnasioreserva_spring.mapper.ReservaMapper;
 import com.gimansioreserva.gimnasioreserva_spring.repository.ClaseRepository;
 import com.gimansioreserva.gimnasioreserva_spring.repository.ReservaRepository;
@@ -88,6 +91,30 @@ public class ReservaServiceTest {
         verify(claseRepository).findById(idClase);
 
         verify(reservaRepository, never()).save(any());
+        verifyNoInteractions(reservaMapper, reservaValidator, eventoGymService);
+    }
+
+    @Test
+    void crearReserva_reservaDuplicada_shouldThrowReservaDuplicada_andNotSave() {
+        // Arrange
+        Long idUsuario = 1L;
+        Long idClase = 10L;
+
+        Usuario usuario = mock(Usuario.class);
+        Clase clase = mock(Clase.class);
+
+        when(usuarioRepository.findById(idUsuario)).thenReturn(Optional.of(usuario));
+        when(claseRepository.findById(idClase)).thenReturn(Optional.of(clase));
+        when(reservaRepository.buscarReservaDuplicada(idUsuario, idClase))
+                .thenReturn(Optional.of(new Reserva()));
+
+        // Act + Assert
+        assertThrows(ReservaDuplicadaException.class,
+                () -> reservaService.crearReserva(idUsuario, idClase));
+
+        verify(reservaRepository).buscarReservaDuplicada(idUsuario, idClase);
+        verify(reservaRepository, never()).save(any());
+
         verifyNoInteractions(reservaMapper, reservaValidator, eventoGymService);
     }
 
