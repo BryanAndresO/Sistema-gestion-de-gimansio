@@ -8,8 +8,13 @@ import com.gimansioreserva.gimnasioreserva_spring.service.core.EventoGymService;
 import com.gimansioreserva.gimnasioreserva_spring.service.core.ReservaService;
 import com.gimansioreserva.gimnasioreserva_spring.validator.ReservaValidator;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.mock;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 public class ReservaServiceTest {
     private ReservaRepository reservaRepository;
@@ -19,7 +24,8 @@ public class ReservaServiceTest {
     private ReservaValidator reservaValidator;
     private EventoGymService eventoGymService;
 
-    private ReservaService reservaService;
+    private
+    ReservaService reservaService;
 
     @BeforeEach
     void setup() {
@@ -39,4 +45,26 @@ public class ReservaServiceTest {
                 eventoGymService
         );
     }
+
+    // crearReserva(...)
+
+    @Test
+    void crearReserva_usuarioNoExiste_shouldThrow_andNotCallOtherDependencies() {
+        // Arrange
+        Long idUsuario = 1L;
+        Long idClase = 10L;
+
+        when(usuarioRepository.findById(idUsuario)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> reservaService.crearReserva(idUsuario, idClase));
+
+        assertEquals("Usuario no encontrado", ex.getMessage());
+
+        // Verificaciones: falla temprano
+        verify(usuarioRepository).findById(idUsuario);
+        verifyNoInteractions(claseRepository, reservaRepository, reservaMapper, reservaValidator, eventoGymService);
+    }
+
 }
