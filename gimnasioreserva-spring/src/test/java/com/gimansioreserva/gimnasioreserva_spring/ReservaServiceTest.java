@@ -222,4 +222,37 @@ public class ReservaServiceTest {
         verify(reservaRepository, never()).save(any());
         verifyNoInteractions(reservaMapper, reservaValidator, eventoGymService);
     }
+
+    @Test
+    void cancelarReserva_reservaNotBelongToUser_shouldThrow_andNotSave() {
+        // Arrange
+        Long idReserva = 99L;
+        Long idUsuarioSolicitante = 1L;
+        Long idUsuarioDueno = 2L;
+
+        Usuario dueno = mock(Usuario.class);
+        when(dueno.getIdUsuario()).thenReturn(idUsuarioDueno);
+
+        Clase clase = mock(Clase.class);
+        when(clase.getIdClase()).thenReturn(10L);
+
+        Reserva reserva = new Reserva();
+        reserva.setIdReserva(idReserva);
+        reserva.setUsuario(dueno);
+        reserva.setClase(clase);
+        reserva.setEstado("CONFIRMADA");
+        reserva.setFechaReserva(LocalDateTime.now().minusHours(1));
+
+        when(reservaRepository.findById(idReserva)).thenReturn(Optional.of(reserva));
+
+        // Act + Assert
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> reservaService.cancelarReserva(idReserva, idUsuarioSolicitante));
+
+        assertEquals("La reserva no pertenece al usuario", ex.getMessage());
+
+        verify(reservaRepository).findById(idReserva);
+        verify(reservaRepository, never()).save(any());
+        verifyNoInteractions(reservaMapper, reservaValidator, eventoGymService);
+    }
 }
