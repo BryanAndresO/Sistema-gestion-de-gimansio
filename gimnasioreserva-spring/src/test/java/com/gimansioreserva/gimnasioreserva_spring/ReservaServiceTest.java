@@ -1,5 +1,7 @@
 package com.gimansioreserva.gimnasioreserva_spring;
 
+import com.gimansioreserva.gimnasioreserva_spring.domain.Usuario;
+import com.gimansioreserva.gimnasioreserva_spring.exception.ClaseNoDisponibleException;
 import com.gimansioreserva.gimnasioreserva_spring.mapper.ReservaMapper;
 import com.gimansioreserva.gimnasioreserva_spring.repository.ClaseRepository;
 import com.gimansioreserva.gimnasioreserva_spring.repository.ReservaRepository;
@@ -65,6 +67,28 @@ public class ReservaServiceTest {
         // Verificaciones: falla temprano
         verify(usuarioRepository).findById(idUsuario);
         verifyNoInteractions(claseRepository, reservaRepository, reservaMapper, reservaValidator, eventoGymService);
+    }
+
+    @Test
+    void crearReserva_claseNoExiste_shouldThrowClaseNoDisponible_andNotSave() {
+        // Arrange
+        Long idUsuario = 1L;
+        Long idClase = 10L;
+
+        Usuario usuario = mock(Usuario.class);
+
+        when(usuarioRepository.findById(idUsuario)).thenReturn(Optional.of(usuario));
+        when(claseRepository.findById(idClase)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        assertThrows(ClaseNoDisponibleException.class,
+                () -> reservaService.crearReserva(idUsuario, idClase));
+
+        verify(usuarioRepository).findById(idUsuario);
+        verify(claseRepository).findById(idClase);
+
+        verify(reservaRepository, never()).save(any());
+        verifyNoInteractions(reservaMapper, reservaValidator, eventoGymService);
     }
 
 }
