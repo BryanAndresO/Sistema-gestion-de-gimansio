@@ -301,4 +301,51 @@ public class ReservaServiceTest {
         assertTrue(eventos.stream().anyMatch(e -> e.getTipo() == TipoEvento.RESERVA_CANCELADA));
         assertTrue(eventos.stream().anyMatch(e -> e.getTipo() == TipoEvento.CUPO_DISPONIBLE));
     }
+
+    // =========================================================
+    // completarReservasPasadas(...)
+    // =========================================================
+
+    @Test
+    void completarReservasPasadas_shouldMarkPastConfirmedAsCompletada_andSaveAll() {
+        // Arrange
+        LocalDateTime ahora = LocalDateTime.now();
+
+        Clase clasePasada = mock(Clase.class);
+        when(clasePasada.getHorario()).thenReturn(ahora.minusHours(3));
+
+        Clase claseFutura = mock(Clase.class);
+        when(claseFutura.getHorario()).thenReturn(ahora.plusHours(3));
+
+        Reserva rPasada = new Reserva();
+        rPasada.setIdReserva(1L);
+        rPasada.setClase(clasePasada);
+        rPasada.setEstado("CONFIRMADA");
+
+        Reserva rFutura = new Reserva();
+        rFutura.setIdReserva(2L);
+        rFutura.setClase(claseFutura);
+        rFutura.setEstado("CONFIRMADA");
+
+        when(reservaRepository.findByEstado("CONFIRMADA")).thenReturn(List.of(rPasada, rFutura));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Reserva>> listCaptor = ArgumentCaptor.forClass(List.class);
+
+        // Act
+        reservaService.completarReservasPasadas();
+
+        // Assert
+        verify(reservaRepository).saveAll(listCaptor.capture());
+        List<Reserva> guardadas = listCaptor.getValue();
+
+        // Solo debe guardar 1 (la pasada)
+        assertEquals(1, guardadas.size());
+        assertEquals(1L, guardadas.get(0).getIdReserva());
+        assertEquals("COMPLETADA", guardadas.get(0).getEstado());
+
+        // La futura NO se toca (sigue CONFIRMADA) y no se guarda
+        assertEquals("CONFIRMADA", rFutura.getEstado());
+    }
+
 }
