@@ -4,6 +4,7 @@ import com.gimansioreserva.gimnasioreserva_spring.domain.*;
 import com.gimansioreserva.gimnasioreserva_spring.dto.core.ReservaDTO;
 import com.gimansioreserva.gimnasioreserva_spring.exception.ClaseNoDisponibleException;
 import com.gimansioreserva.gimnasioreserva_spring.exception.ReservaDuplicadaException;
+import com.gimansioreserva.gimnasioreserva_spring.exception.ReservaNoEncontradaException;
 import com.gimansioreserva.gimnasioreserva_spring.mapper.ReservaMapper;
 import com.gimansioreserva.gimnasioreserva_spring.repository.ClaseRepository;
 import com.gimansioreserva.gimnasioreserva_spring.repository.ReservaRepository;
@@ -201,5 +202,24 @@ public class ReservaServiceTest {
         assertTrue(eventos.stream().anyMatch(e -> e.getTipo() == TipoEvento.CLASE_LLENA));
     }
 
+    // =========================================================
+    // cancelarReserva(...)
+    // =========================================================
 
+    @Test
+    void cancelarReserva_reservaNoExiste_shouldThrowReservaNoEncontrada() {
+        // Arrange
+        Long idReserva = 99L;
+        Long idUsuario = 1L;
+
+        when(reservaRepository.findById(idReserva)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        assertThrows(ReservaNoEncontradaException.class,
+                () -> reservaService.cancelarReserva(idReserva, idUsuario));
+
+        verify(reservaRepository).findById(idReserva);
+        verify(reservaRepository, never()).save(any());
+        verifyNoInteractions(reservaMapper, reservaValidator, eventoGymService);
+    }
 }
