@@ -255,4 +255,50 @@ public class ReservaServiceTest {
         verify(reservaRepository, never()).save(any());
         verifyNoInteractions(reservaMapper, reservaValidator, eventoGymService);
     }
+
+    @Test
+    void cancelarReserva_valid_shouldSetEstadoCancelada_save_andEmitTwoEvents() {
+        // Arrange
+        Long idReserva = 99L;
+        Long idUsuario = 1L;
+
+        Usuario usuario = mock(Usuario.class);
+        when(usuario.getIdUsuario()).thenReturn(idUsuario);
+
+        Clase clase = mock(Clase.class);
+        when(clase.getIdClase()).thenReturn(10L);
+
+        Reserva reserva = new Reserva();
+        reserva.setIdReserva(idReserva);
+        reserva.setUsuario(usuario);
+        reserva.setClase(clase);
+        reserva.setEstado("CONFIRMADA");
+        reserva.setFechaReserva(LocalDateTime.now().minusHours(1));
+
+        when(reservaRepository.findById(idReserva)).thenReturn(Optional.of(reserva));
+        when(reservaRepository.save(any(Reserva.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(reservaMapper.toDTO(any(Reserva.class))).thenReturn(new ReservaDTO());
+
+        ArgumentCaptor<Reserva> reservaCaptor = ArgumentCaptor.forClass(Reserva.class);
+        ArgumentCaptor<EventoGym> eventoCaptor = ArgumentCaptor.forClass(EventoGym.class);
+
+        // Act
+        ReservaDTO dto = reservaService.cancelarReserva(idReserva, idUsuario);
+
+        // Assert
+        assertNotNull(dto);
+
+        verify(reservaValidator).validarCancelarReserva(eq(reserva), eq(clase));
+
+        verify(reservaRepository).save(reservaCaptor.capture());
+        Reserva actualizada = reservaCaptor.getValue();
+        assertEquals("CANCELADA", actualizada.getEstado());
+
+        // 2 eventos: RESERVA_CANCELADA y CUPO_DISPONIBLE
+        verify(eventoGymService, times(2)).emitirEvento(eventoCaptor.capture());
+        List<EventoGym> eventos = eventoCaptor.getAllValues();
+
+        assertTrue(eventos.stream().anyMatch(e -> e.getTipo() == TipoEvento.RESERVA_CANCELADA));
+        assertTrue(eventos.stream().anyMatch(e -> e.getTipo() == TipoEvento.CUPO_DISPONIBLE));
+    }
 }
