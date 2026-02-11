@@ -1,4 +1,4 @@
-# Sistema de Gestión de Gimnasio
+# Sistema de Gestión de Gimnasio 💪
 
 Sistema integral para la administración y reserva de clases en gimnasios, desarrollado con una arquitectura moderna de microservicios utilizando Spring Boot (Backend) y React (Frontend).
 
