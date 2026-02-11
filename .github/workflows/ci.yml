@@ -31,6 +31,6 @@ jobs:
         working-directory: ./gimnasioreserva-spring
         run: ./gradlew test
 
-      - name: Construir
+      - name: Compilar proyecto
         working-directory: ./gimnasioreserva-spring
         run: ./gradlew build
