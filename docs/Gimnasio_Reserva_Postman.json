@@ -1,0 +1,2030 @@
+{
+    "info": {
+        "_postman_id": "gimnasio-reserva-collection",
+        "name": "🏋️ Gimnasio Reserva - API Completa",
+        "description": "Colección completa para probar todos los endpoints del Sistema de Gestión de Gimnasio.\n\nORDEN DE EJECUCIÓN:\n1. Registrar usuario (USER)\n2. Registrar admin (ADMIN)\n3. Login con admin para obtener token\n4. Crear entrenadores\n5. Crear clases\n6. Login con usuario normal\n7. Crear reservas\n8. Consultar estadísticas y reportes",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://sistema-gestion-de-gimansio.onrender.com/api",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "adminToken",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "userId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "entrenadorId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "claseId",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "📌 PASO 1 - Autenticación",
+            "item": [
+                {
+                    "name": "1.1 Registrar Usuario Normal",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Carlos Pérez\",\n    \"correo\": \"carlos@gmail.com\",\n    \"contrasena\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "1.2 Registrar Usuario Admin",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Admin Principal\",\n    \"correo\": \"admin@gimnasio.com\",\n    \"contrasena\": \"admin123\",\n    \"rol\": \"ADMIN\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "1.3 Login Admin (Guardar Token)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.data && jsonData.data.accessToken) {",
+                                    "    pm.collectionVariables.set('adminToken', jsonData.data.accessToken);",
+                                    "    pm.collectionVariables.set('userId', jsonData.data.idUsuario);",
+                                    "    console.log('Admin Token guardado exitosamente');",
+                                    "} else if (jsonData.accessToken) {",
+                                    "    pm.collectionVariables.set('adminToken', jsonData.accessToken);",
+                                    "    console.log('Admin Token guardado exitosamente (formato alternativo)');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"correo\": \"admin@gimnasio.com\",\n    \"contrasena\": \"admin123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "1.4 Login Usuario Normal (Guardar Token)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.data && jsonData.data.accessToken) {",
+                                    "    pm.collectionVariables.set('token', jsonData.data.accessToken);",
+                                    "    pm.collectionVariables.set('userId', jsonData.data.idUsuario);",
+                                    "    console.log('User Token guardado: ' + jsonData.data.idUsuario);",
+                                    "} else if (jsonData.accessToken) {",
+                                    "    pm.collectionVariables.set('token', jsonData.accessToken);",
+                                    "    console.log('User Token guardado (formato alternativo)');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"correo\": \"carlos@gmail.com\",\n    \"contrasena\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "1.5 Restablecer Contraseña",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"correo\": \"carlos@gmail.com\",\n    \"nuevaContrasena\": \"nuevaPass123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/reset-password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "reset-password"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "1.6 Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/logout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "logout"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 2 - Admin Entrenadores",
+            "item": [
+                {
+                    "name": "2.1 Crear Entrenador 1 - Yoga",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.idEntrenador) {",
+                                    "    pm.collectionVariables.set('entrenadorId', jsonData.idEntrenador);",
+                                    "    console.log('Entrenador ID guardado: ' + jsonData.idEntrenador);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"María García\",\n    \"especialidad\": \"Yoga\",\n    \"certificaciones\": \"Yoga Alliance RYT-200, Pilates Mat Certified\",\n    \"activo\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.2 Crear Entrenador 2 - CrossFit",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Juan Martínez\",\n    \"especialidad\": \"CrossFit\",\n    \"certificaciones\": \"CrossFit Level 2, NSCA-CSCS\",\n    \"activo\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.3 Crear Entrenador 3 - Spinning",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Laura Rodríguez\",\n    \"especialidad\": \"Spinning\",\n    \"certificaciones\": \"Spinning Certified Instructor, ACE Group Fitness\",\n    \"activo\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.4 Listar Todos los Entrenadores",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.5 Listar Entrenadores Activos",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores/activos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores",
+                                "activos"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.6 Buscar Entrenador por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores/{{entrenadorId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores",
+                                "{{entrenadorId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.7 Buscar por Especialidad",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores/especialidad/Yoga",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores",
+                                "especialidad",
+                                "Yoga"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.8 Obtener Especialidades",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores/especialidades",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores",
+                                "especialidades"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.9 Actualizar Entrenador",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"María García López\",\n    \"especialidad\": \"Yoga y Pilates\",\n    \"certificaciones\": \"Yoga Alliance RYT-500, Pilates Reformer Certified\",\n    \"activo\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores/{{entrenadorId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores",
+                                "{{entrenadorId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "2.10 Contar Clases de Entrenador",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/entrenadores/{{entrenadorId}}/total-clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "entrenadores",
+                                "{{entrenadorId}}",
+                                "total-clases"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 3 - Admin Clases",
+            "item": [
+                {
+                    "name": "3.1 Crear Clase - Yoga Matutino",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.idClase) {",
+                                    "    pm.collectionVariables.set('claseId', jsonData.idClase);",
+                                    "    console.log('Clase ID guardada: ' + jsonData.idClase);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Yoga Matutino\",\n    \"descripcion\": \"Clase de yoga para principiantes e intermedios. Incluye meditación y estiramientos profundos.\",\n    \"horario\": \"2026-02-15T08:00:00\",\n    \"cupo\": 20,\n    \"duracionMinutos\": 60,\n    \"activo\": true,\n    \"idEntrenador\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.2 Crear Clase - CrossFit Intenso",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"CrossFit Intenso\",\n    \"descripcion\": \"Entrenamiento funcional de alta intensidad. Ideal para quienes buscan un reto físico.\",\n    \"horario\": \"2026-02-15T10:00:00\",\n    \"cupo\": 15,\n    \"duracionMinutos\": 45,\n    \"activo\": true,\n    \"idEntrenador\": 2\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.3 Crear Clase - Spinning Nocturno",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Spinning Nocturno\",\n    \"descripcion\": \"Sesión energética de spinning con música motivacional. Quema calorías y mejora tu resistencia.\",\n    \"horario\": \"2026-02-15T19:00:00\",\n    \"cupo\": 25,\n    \"duracionMinutos\": 50,\n    \"activo\": true,\n    \"idEntrenador\": 3\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.4 Crear Clase - Pilates Terapéutico",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Pilates Terapéutico\",\n    \"descripcion\": \"Clase enfocada en la rehabilitación y fortalecimiento del core. Apta para todos los niveles.\",\n    \"horario\": \"2026-02-16T09:00:00\",\n    \"cupo\": 12,\n    \"duracionMinutos\": 55,\n    \"activo\": true,\n    \"idEntrenador\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.5 Crear Clase - Funcional Express",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Funcional Express\",\n    \"descripcion\": \"Entrenamiento funcional corto e intenso para hora de almuerzo.\",\n    \"horario\": \"2026-02-16T12:30:00\",\n    \"cupo\": 18,\n    \"duracionMinutos\": 30,\n    \"activo\": true,\n    \"idEntrenador\": 2\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.6 Listar Todas las Clases",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.7 Listar Clases Activas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/activas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "activas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.8 Buscar Clase por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/{{claseId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "{{claseId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.9 Buscar Clases por Nombre",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/buscar?nombre=Yoga",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "buscar"
+                            ],
+                            "query": [
+                                {
+                                    "key": "nombre",
+                                    "value": "Yoga"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.10 Clases por Entrenador",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/entrenador/{{entrenadorId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "entrenador",
+                                "{{entrenadorId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.11 Clases Disponibles (con cupos)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/disponibles",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "disponibles"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.12 Clases Próximas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/proximas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "proximas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.13 Actualizar Clase",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Yoga Matutino Premium\",\n    \"descripcion\": \"Clase de yoga premium con meditación guiada y aromaterapia.\",\n    \"horario\": \"2026-02-15T07:30:00\",\n    \"cupo\": 25,\n    \"duracionMinutos\": 75,\n    \"activo\": true,\n    \"idEntrenador\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/{{claseId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "{{claseId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.14 Total Reservas de Clase",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/{{claseId}}/total-reservas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "{{claseId}}",
+                                "total-reservas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3.15 Clases por Rango de Fechas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/clases/rango-fechas?inicio=2026-02-01T00:00:00&fin=2026-02-28T23:59:59",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "clases",
+                                "rango-fechas"
+                            ],
+                            "query": [
+                                {
+                                    "key": "inicio",
+                                    "value": "2026-02-01T00:00:00"
+                                },
+                                {
+                                    "key": "fin",
+                                    "value": "2026-02-28T23:59:59"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 4 - Admin Usuarios",
+            "item": [
+                {
+                    "name": "4.1 Crear Usuario desde Admin",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"nombre\": \"Ana López\",\n    \"correo\": \"ana@gmail.com\",\n    \"contrasena\": \"ana12345\",\n    \"rol\": \"USER\",\n    \"activo\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.2 Listar Todos los Usuarios",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.3 Listar Usuarios Activos",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios/activos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios",
+                                "activos"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.4 Buscar por Correo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios/correo/carlos@gmail.com",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios",
+                                "correo",
+                                "carlos@gmail.com"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.5 Buscar por Nombre",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios/buscar?nombre=Carlos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios",
+                                "buscar"
+                            ],
+                            "query": [
+                                {
+                                    "key": "nombre",
+                                    "value": "Carlos"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.6 Buscar por Rol",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios/rol/USER",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios",
+                                "rol",
+                                "USER"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.7 Cambiar Rol de Usuario",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"rol\": \"ADMIN\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios/{{userId}}/rol",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios",
+                                "{{userId}}",
+                                "rol"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.8 Contar por Rol",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios/contar/rol/USER",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios",
+                                "contar",
+                                "rol",
+                                "USER"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.9 Usuarios con Reservas Activas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios/con-reservas-activas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios",
+                                "con-reservas-activas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4.10 Verificar si Existe Correo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/usuarios/existe-correo/carlos@gmail.com",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "usuarios",
+                                "existe-correo",
+                                "carlos@gmail.com"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 5 - Reservas (Usuario)",
+            "item": [
+                {
+                    "name": "5.1 Crear Reserva (Yoga)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"idUsuario\": {{userId}},\n    \"idClase\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/reservas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reservas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "5.2 Crear Reserva (CrossFit)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"idUsuario\": {{userId}},\n    \"idClase\": 2\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/reservas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reservas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "5.3 Crear Reserva (Spinning)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"idUsuario\": {{userId}},\n    \"idClase\": 3\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/reservas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reservas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "5.4 Mis Reservas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/reservas/usuario/{{userId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reservas",
+                                "usuario",
+                                "{{userId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "5.5 Mis Reservas Confirmadas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/reservas/usuario/{{userId}}/confirmadas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reservas",
+                                "usuario",
+                                "{{userId}}",
+                                "confirmadas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "5.6 Mi Historial",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/reservas/usuario/{{userId}}/historial",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reservas",
+                                "usuario",
+                                "{{userId}}",
+                                "historial"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "5.7 Cancelar Reserva",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"idUsuario\": {{userId}}\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/reservas/1/cancelar",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "reservas",
+                                "1",
+                                "cancelar"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 6 - Clases (Usuario)",
+            "item": [
+                {
+                    "name": "6.1 Ver Clases Disponibles",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "clases"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "6.2 Ver Clases Próximas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/clases/proximas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "clases",
+                                "proximas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "6.3 Ver Clases Activas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/clases/activas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "clases",
+                                "activas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "6.4 Ver Clase por ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/clases/{{claseId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "clases",
+                                "{{claseId}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "6.5 Buscar Clases por Nombre",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/clases/buscar?nombre=Yoga",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "clases",
+                                "buscar"
+                            ],
+                            "query": [
+                                {
+                                    "key": "nombre",
+                                    "value": "Yoga"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 7 - Disponibilidad",
+            "item": [
+                {
+                    "name": "7.1 Disponibilidad de una Clase",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/disponibilidad/clase/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "disponibilidad",
+                                "clase",
+                                "1"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "7.2 Disponibilidad de Todas las Clases",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/disponibilidad/clases",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "disponibilidad",
+                                "clases"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "7.3 Clases con Cupos Disponibles",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/disponibilidad/clases/disponibles",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "disponibilidad",
+                                "clases",
+                                "disponibles"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 8 - Estadísticas",
+            "item": [
+                {
+                    "name": "8.1 Estadísticas Generales",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/estadisticas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "estadisticas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "8.2 Estadísticas por Periodo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/estadisticas/periodo?inicio=2026-01-01T00:00:00&fin=2026-12-31T23:59:59",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "estadisticas",
+                                "periodo"
+                            ],
+                            "query": [
+                                {
+                                    "key": "inicio",
+                                    "value": "2026-01-01T00:00:00"
+                                },
+                                {
+                                    "key": "fin",
+                                    "value": "2026-12-31T23:59:59"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 9 - Admin Reportes",
+            "item": [
+                {
+                    "name": "9.1 Reporte General",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reportes/general",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reportes",
+                                "general"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "9.2 Reporte Semanal",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reportes/semanal",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reportes",
+                                "semanal"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "9.3 Reporte Diario",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reportes/diario",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reportes",
+                                "diario"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "9.4 Reporte Mensual",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reportes/mensual?mes=2&anio=2026",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reportes",
+                                "mensual"
+                            ],
+                            "query": [
+                                {
+                                    "key": "mes",
+                                    "value": "2"
+                                },
+                                {
+                                    "key": "anio",
+                                    "value": "2026"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "9.5 Reporte por Periodo",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reportes/periodo?inicio=2026-02-01T00:00:00&fin=2026-02-28T23:59:59",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reportes",
+                                "periodo"
+                            ],
+                            "query": [
+                                {
+                                    "key": "inicio",
+                                    "value": "2026-02-01T00:00:00"
+                                },
+                                {
+                                    "key": "fin",
+                                    "value": "2026-02-28T23:59:59"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "9.6 Estadísticas de Entrenadores",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reportes/estadisticas/entrenadores",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reportes",
+                                "estadisticas",
+                                "entrenadores"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 10 - Admin Reservas",
+            "item": [
+                {
+                    "name": "10.1 Listar Todas las Reservas",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reservas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reservas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "10.2 Reservas por Estado",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reservas/estado/CONFIRMADA",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reservas",
+                                "estado",
+                                "CONFIRMADA"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "10.3 Cambiar Estado de Reserva",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{adminToken}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"estado\": \"COMPLETADA\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/reservas/1/estado",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "reservas",
+                                "1",
+                                "estado"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "📌 PASO 11 - Recomendaciones (SSE)",
+            "item": [
+                {
+                    "name": "11.1 Simular Evento (CUPO_DISPONIBLE)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"claseId\": \"1\",\n    \"tipo\": \"CUPO_DISPONIBLE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/recomendaciones/simular",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "recomendaciones",
+                                "simular"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "11.2 Simular Evento (CLASE_LLENA)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"claseId\": \"2\",\n    \"tipo\": \"CLASE_LLENA\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/recomendaciones/simular",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "recomendaciones",
+                                "simular"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "11.3 Simular Evento (RESERVA_CREADA)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"claseId\": \"1\",\n    \"tipo\": \"RESERVA_CREADA\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/recomendaciones/simular",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "recomendaciones",
+                                "simular"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "11.4 Simular Evento (CAMBIO_HORARIO)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"claseId\": \"3\",\n    \"tipo\": \"CAMBIO_HORARIO\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/recomendaciones/simular",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "recomendaciones",
+                                "simular"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "11.5 Simular Evento (RESERVA_CANCELADA)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"claseId\": \"2\",\n    \"tipo\": \"RESERVA_CANCELADA\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/recomendaciones/simular",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "recomendaciones",
+                                "simular"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
