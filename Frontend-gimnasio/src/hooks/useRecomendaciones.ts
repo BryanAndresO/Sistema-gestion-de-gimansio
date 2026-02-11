@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { conectarRecomendaciones, type RecomendacionDTO } from '../services/core/recomendacionService';
+import { conectarRecomendaciones, type RecomendacionDTO, esHeartbeat } from '../services/core/recomendacionService';
 
 /**
  * Hook para manejar recomendaciones en tiempo real mediante SSE
@@ -15,6 +15,12 @@ export const useRecomendaciones = () => {
   useEffect(() => {
     // Función para manejar cada mensaje recibido
     const handleMensaje = (recomendacion: RecomendacionDTO) => {
+      // Ignorar heartbeats
+      if (esHeartbeat(recomendacion)) {
+        console.log('Heartbeat ignorado en hook:', recomendacion.timestamp);
+        return;
+      }
+
       // Evitar duplicados por claseId
       if (clasesIdsRef.current.has(recomendacion.claseId)) {
         console.log('Recomendación duplicada ignorada:', recomendacion.claseId);
@@ -29,6 +35,7 @@ export const useRecomendaciones = () => {
         // Verificar nuevamente en el estado para evitar duplicados en actualizaciones concurrentes
         const existe = prev.some((r) => r.claseId === recomendacion.claseId);
         if (!existe) {
+          console.log('Nueva recomendación agregada:', recomendacion);
           return [...prev, recomendacion];
         }
         return prev;
