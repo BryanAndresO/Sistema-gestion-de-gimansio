@@ -1,7 +1,7 @@
 {
     "info": {
         "_postman_id": "gimnasio-reserva-collection",
-        "name": "🏋️ Gimnasio Reserva - API Completa",
+        "name": "Gimnasio Reserva - API Completa",
         "description": "Colección completa para probar todos los endpoints del Sistema de Gestión de Gimnasio.\n\nORDEN DE EJECUCIÓN:\n1. Registrar usuario (USER)\n2. Registrar admin (ADMIN)\n3. Login con admin para obtener token\n4. Crear entrenadores\n5. Crear clases\n6. Login con usuario normal\n7. Crear reservas\n8. Consultar estadísticas y reportes",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
@@ -39,7 +39,7 @@
     ],
     "item": [
         {
-            "name": "📌 PASO 1 - Autenticación",
+            "name": "PASO 1 - Autenticación",
             "item": [
                 {
                     "name": "1.1 Registrar Usuario Normal",
@@ -234,7 +234,7 @@
             ]
         },
         {
-            "name": "📌 PASO 2 - Admin Entrenadores",
+            "name": " PASO 2 - Admin Entrenadores",
             "item": [
                 {
                     "name": "2.1 Crear Entrenador 1 - Yoga",
@@ -514,7 +514,7 @@
             ]
         },
         {
-            "name": "📌 PASO 3 - Admin Clases",
+            "name": "PASO 3 - Admin Clases",
             "item": [
                 {
                     "name": "3.1 Crear Clase - Yoga Matutino",
@@ -939,7 +939,7 @@
             ]
         },
         {
-            "name": "📌 PASO 4 - Admin Usuarios",
+            "name": " PASO 4 - Admin Usuarios",
             "item": [
                 {
                     "name": "4.1 Crear Usuario desde Admin",
@@ -1200,7 +1200,7 @@
             ]
         },
         {
-            "name": "📌 PASO 5 - Reservas (Usuario)",
+            "name": " PASO 5 - Reservas (Usuario)",
             "item": [
                 {
                     "name": "5.1 Crear Reserva (Yoga)",
@@ -1394,7 +1394,7 @@
             ]
         },
         {
-            "name": "📌 PASO 6 - Clases (Usuario)",
+            "name": " PASO 6 - Clases (Usuario)",
             "item": [
                 {
                     "name": "6.1 Ver Clases Disponibles",
@@ -1514,7 +1514,7 @@
             ]
         },
         {
-            "name": "📌 PASO 7 - Disponibilidad",
+            "name": " PASO 7 - Disponibilidad",
             "item": [
                 {
                     "name": "7.1 Disponibilidad de una Clase",
@@ -1587,7 +1587,7 @@
             ]
         },
         {
-            "name": "📌 PASO 8 - Estadísticas",
+            "name": " PASO 8 - Estadísticas",
             "item": [
                 {
                     "name": "8.1 Estadísticas Generales",
@@ -1645,7 +1645,7 @@
             ]
         },
         {
-            "name": "📌 PASO 9 - Admin Reportes",
+            "name": " PASO 9 - Admin Reportes",
             "item": [
                 {
                     "name": "9.1 Reporte General",
@@ -1809,7 +1809,7 @@
             ]
         },
         {
-            "name": "📌 PASO 10 - Admin Reservas",
+            "name": " PASO 10 - Admin Reservas",
             "item": [
                 {
                     "name": "10.1 Listar Todas las Reservas",
@@ -1892,7 +1892,7 @@
             ]
         },
         {
-            "name": "📌 PASO 11 - Recomendaciones (SSE)",
+            "name": " PASO 11 - Recomendaciones (SSE)",
             "item": [
                 {
                     "name": "11.1 Simular Evento (CUPO_DISPONIBLE)",
