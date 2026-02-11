@@ -5,7 +5,7 @@
 # Su objetivo es:
 #   1. Ejecutar las pruebas automatizadas
 #   2. Construir el proyecto con Gradle
-#   3. Generar el archivo ejecutable (.jar)
+#   3. Generar el archivo JAR ejecutable
 #   4. Publicar el .jar como artefacto descargable
 # =============================================================================
 
