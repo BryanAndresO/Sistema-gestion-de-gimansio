@@ -348,4 +348,38 @@ public class ReservaServiceTest {
         assertEquals("CONFIRMADA", rFutura.getEstado());
     }
 
+    @Test
+    void completarReservasPasadas_whenNoPastConfirmed_shouldSaveAllWithEmptyList_andNotChangeAnything() {
+        // Arrange
+        LocalDateTime ahora = LocalDateTime.now();
+
+        Clase claseFutura = mock(Clase.class);
+        when(claseFutura.getHorario()).thenReturn(ahora.plusHours(3));
+
+        Reserva rFutura = new Reserva();
+        rFutura.setIdReserva(1L);
+        rFutura.setClase(claseFutura);
+        rFutura.setEstado("CONFIRMADA");
+
+        when(reservaRepository.findByEstado("CONFIRMADA")).thenReturn(List.of(rFutura));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Reserva>> captor = ArgumentCaptor.forClass(List.class);
+
+        // Act
+        reservaService.completarReservasPasadas();
+
+        // Assert
+        verify(reservaRepository).saveAll(captor.capture());
+        List<Reserva> guardadas = captor.getValue();
+
+        // Como no hay reservas pasadas, la lista a guardar debe estar vacía
+        assertTrue(guardadas.isEmpty());
+
+        // La reserva futura no debe cambiar
+        assertEquals("CONFIRMADA", rFutura.getEstado());
+    }
+
+
+
 }
