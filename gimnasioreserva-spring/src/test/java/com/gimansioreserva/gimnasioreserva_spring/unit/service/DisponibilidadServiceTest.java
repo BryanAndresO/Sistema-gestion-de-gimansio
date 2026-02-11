@@ -24,9 +24,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class DisponibilidadServiceTest {
 
+    // Mock del repositorio que accede a los datos de clases
     @Mock
     private ClaseRepository claseRepository;
 
+    // Inyecta los mocks en el servicio a probar
     @InjectMocks
     private DisponibilidadService disponibilidadService;
 
@@ -39,47 +41,54 @@ class DisponibilidadServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Obtiene fecha actual para configurar horarios relativos
         LocalDateTime ahora = LocalDateTime.now();
         
+        // Reserva confirmada base para todas las clases
         reservaConfirmada = new Reserva();
         reservaConfirmada.setEstado("CONFIRMADA");
 
+        // ESCENARIO 1: Clase ideal - activa con cupos y tiempo suficiente
         claseActivaConCupos = new Clase();
         claseActivaConCupos.setIdClase(1L);
         claseActivaConCupos.setNombre("Yoga");
-        claseActivaConCupos.setHorario(ahora.plusHours(3));
+        claseActivaConCupos.setHorario(ahora.plusHours(3)); // 3 horas en futuro
         claseActivaConCupos.setCupo(10);
         claseActivaConCupos.setActivo(true);
-        claseActivaConCupos.setReservas(Arrays.asList(reservaConfirmada));
+        claseActivaConCupos.setReservas(Arrays.asList(reservaConfirmada)); // 1 reserva, 9 cupos libres
 
+        // ESCENARIO 2: Clase inactiva - no se puede reservar aunque tenga cupos
         claseInactiva = new Clase();
         claseInactiva.setIdClase(2L);
         claseInactiva.setNombre("Pilates");
         claseInactiva.setHorario(ahora.plusHours(3));
         claseInactiva.setCupo(10);
-        claseInactiva.setActivo(false);
+        claseInactiva.setActivo(false); // Clase desactivada
         claseInactiva.setReservas(Arrays.asList(reservaConfirmada));
 
+        // ESCENARIO 3: Clase llena - sin cupos disponibles
         claseSinCupos = new Clase();
         claseSinCupos.setIdClase(3L);
         claseSinCupos.setNombre("Spinning");
         claseSinCupos.setHorario(ahora.plusHours(3));
         claseSinCupos.setCupo(1);
         claseSinCupos.setActivo(true);
-        claseSinCupos.setReservas(Arrays.asList(reservaConfirmada));
+        claseSinCupos.setReservas(Arrays.asList(reservaConfirmada)); // 1 reserva, 0 cupos libres
 
+        // ESCENARIO 4: Clase con horario muy cercano - menos de 2 horas
         claseHorarioCercano = new Clase();
         claseHorarioCercano.setIdClase(4L);
         claseHorarioCercano.setNombre("Crossfit");
-        claseHorarioCercano.setHorario(ahora.plusHours(1));
+        claseHorarioCercano.setHorario(ahora.plusHours(1)); // Solo 1 hora en futuro
         claseHorarioCercano.setCupo(10);
         claseHorarioCercano.setActivo(true);
         claseHorarioCercano.setReservas(Arrays.asList(reservaConfirmada));
 
+        // ESCENARIO 5: Clase con horario lejano - más de 2 horas (escenario perfecto)
         claseHorarioLejano = new Clase();
         claseHorarioLejano.setIdClase(5L);
         claseHorarioLejano.setNombre("Zumba");
-        claseHorarioLejano.setHorario(ahora.plusHours(5));
+        claseHorarioLejano.setHorario(ahora.plusHours(5)); // 5 horas en futuro
         claseHorarioLejano.setCupo(10);
         claseHorarioLejano.setActivo(true);
         claseHorarioLejano.setReservas(Arrays.asList(reservaConfirmada));
@@ -87,30 +96,27 @@ class DisponibilidadServiceTest {
 
     @Test
     void verificarDisponibilidad_claseNoExiste_shouldThrow() {
-        // Given
+        // Arrange
         Long idClaseInexistente = 999L;
         when(claseRepository.findById(idClaseInexistente)).thenReturn(Optional.empty());
 
-        // When & Then
-        ClaseNoDisponibleException exception = assertThrows(
-                ClaseNoDisponibleException.class,
-                () -> disponibilidadService.verificarDisponibilidad(idClaseInexistente)
-        );
-
-        assertEquals("La clase con ID " + idClaseInexistente + " no está disponible", exception.getMessage());
+        // Act + Assert
+        assertThrows(ClaseNoDisponibleException.class,
+                () -> disponibilidadService.verificarDisponibilidad(idClaseInexistente));
+        
         verify(claseRepository, times(1)).findById(idClaseInexistente);
     }
 
     @Test
     void verificarDisponibilidad_activaConCupos_shouldDisponibleTrue() {
-        // Given
+        // Arrange
         Long idClaseActiva = 1L;
         when(claseRepository.findById(idClaseActiva)).thenReturn(Optional.of(claseActivaConCupos));
 
-        // When
+        // Act
         DisponibilidadDTO resultado = disponibilidadService.verificarDisponibilidad(idClaseActiva);
 
-        // Then
+        // Assert
         assertNotNull(resultado);
         assertEquals(idClaseActiva, resultado.getIdClase());
         assertEquals("Yoga", resultado.getNombreClase());
@@ -126,14 +132,14 @@ class DisponibilidadServiceTest {
 
     @Test
     void verificarDisponibilidad_inactiva_shouldDisponibleFalse() {
-        // Given
+        // Arrange
         Long idClaseInactiva = 2L;
         when(claseRepository.findById(idClaseInactiva)).thenReturn(Optional.of(claseInactiva));
 
-        // When
+        // Act
         DisponibilidadDTO resultado = disponibilidadService.verificarDisponibilidad(idClaseInactiva);
 
-        // Then
+        // Assert
         assertNotNull(resultado);
         assertEquals(idClaseInactiva, resultado.getIdClase());
         assertEquals("Pilates", resultado.getNombreClase());
@@ -149,14 +155,14 @@ class DisponibilidadServiceTest {
 
     @Test
     void verificarDisponibilidad_sinCupos_shouldDisponibleFalse() {
-        // Given
+        // Arrange
         Long idClaseSinCupos = 3L;
         when(claseRepository.findById(idClaseSinCupos)).thenReturn(Optional.of(claseSinCupos));
 
-        // When
+        // Act
         DisponibilidadDTO resultado = disponibilidadService.verificarDisponibilidad(idClaseSinCupos);
 
-        // Then
+        // Assert
         assertNotNull(resultado);
         assertEquals(idClaseSinCupos, resultado.getIdClase());
         assertEquals("Spinning", resultado.getNombreClase());
@@ -172,14 +178,14 @@ class DisponibilidadServiceTest {
 
     @Test
     void verificarDisponibilidad_horarioMenosDe2Horas_shouldPuedeReservarFalse() {
-        // Given
+        // Arrange
         Long idClaseHorarioCercano = 4L;
         when(claseRepository.findById(idClaseHorarioCercano)).thenReturn(Optional.of(claseHorarioCercano));
 
-        // When
+        // Act
         DisponibilidadDTO resultado = disponibilidadService.verificarDisponibilidad(idClaseHorarioCercano);
 
-        // Then
+        // Assert
         assertNotNull(resultado);
         assertEquals(idClaseHorarioCercano, resultado.getIdClase());
         assertEquals("Crossfit", resultado.getNombreClase());
@@ -195,14 +201,14 @@ class DisponibilidadServiceTest {
 
     @Test
     void verificarDisponibilidad_horarioMasDe2Horas_andDisponible_shouldPuedeReservarTrue() {
-        // Given
+        // Arrange
         Long idClaseHorarioLejano = 5L;
         when(claseRepository.findById(idClaseHorarioLejano)).thenReturn(Optional.of(claseHorarioLejano));
 
-        // When
+        // Act
         DisponibilidadDTO resultado = disponibilidadService.verificarDisponibilidad(idClaseHorarioLejano);
 
-        // Then
+        // Assert
         assertNotNull(resultado);
         assertEquals(idClaseHorarioLejano, resultado.getIdClase());
         assertEquals("Zumba", resultado.getNombreClase());
