@@ -14,12 +14,13 @@ name: CD
 # -----------------------------------------------------------------------------
 # TRIGGER: Define CUÁNDO se ejecuta este workflow
 # -----------------------------------------------------------------------------
-# Solo se ejecuta cuando hay un push a la rama main.
+# Solo se ejecuta cuando hay un push a la rama main o master.
 # Esto garantiza que solo se generen artefactos de código "aprobado".
 on:
   push:
     branches:
       - main
+      - master
 
 jobs:
   # ---------------------------------------------------------------------------
