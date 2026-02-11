@@ -90,4 +90,4 @@ jobs:
         with:
           name: GimnasioReserva-JAR
           path: gimnasioreserva-spring/build/libs/*.jar
-          retention-days: 30              # Se guarda por 30 días
+          retention-days: 30              # Retención por 30 días
