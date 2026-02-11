@@ -1,10 +1,6 @@
-name: CI - Build and Test
+name: CI - Testing
 
 on:
-  push:
-    branches:
-      - master
-      - main
   pull_request:
     branches:
       - master
@@ -12,7 +8,7 @@ on:
 
 jobs:
   # ========================================
-  # BACKEND - Build and Test with H2
+  # BACKEND - Test with H2
   # ========================================
   backend-build:
     name: Backend Build and Test
@@ -40,34 +36,6 @@ jobs:
       - name: Run Tests
         working-directory: ./gimnasioreserva-spring
         run: ./gradlew test
-
-      - name: Generate JAR executable
-        working-directory: ./gimnasioreserva-spring
-        run: ./gradlew bootJar
-
-      - name: Verify JAR was generated
-        working-directory: ./gimnasioreserva-spring
-        run: |
-          if [ ! -f build/libs/*.jar ]; then
-            echo "Error: JAR file not found"
-            exit 1
-          fi
-          ls -lh build/libs/*.jar
-          echo "JAR generated successfully"
-
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-test-results
-          path: gimnasioreserva-spring/build/reports/tests/test/
-
-      - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gimnasio-reserva-jar
-          path: gimnasioreserva-spring/build/libs/*.jar
-          retention-days: 90
 
   # ========================================
   # FRONTEND - Build and Lint
