@@ -1,7 +1,7 @@
-# Nombre que se le da
+# Nombre que se le da al workflow
 name: CI
 
-# Trigger - El accionador
+# Trigger - El accionador del workflow
 on:
   push:
     branches:
