@@ -22,10 +22,10 @@ public class AuthenticationService {
     private final JwtTokenBlacklist jwtTokenBlacklist;
 
     public AuthenticationService(AuthenticationManager authenticationManager,
-                                 UsuarioRepository usuarioRepository,
-                                 PasswordEncoder passwordEncoder,
-                                 JwtTokenProvider jwtTokenProvider,
-                                 JwtTokenBlacklist jwtTokenBlacklist) {
+            UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder,
+            JwtTokenProvider jwtTokenProvider,
+            JwtTokenBlacklist jwtTokenBlacklist) {
         this.authenticationManager = authenticationManager;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
@@ -36,8 +36,7 @@ public class AuthenticationService {
     public LoginResponse login(LoginRequest request) {
         var authToken = new UsernamePasswordAuthenticationToken(
                 request.getCorreo(),
-                request.getContrasena()
-        );
+                request.getContrasena());
 
         authenticationManager.authenticate(authToken);
 
@@ -54,8 +53,7 @@ public class AuthenticationService {
                 usuario.getIdUsuario(),
                 usuario.getCorreo(),
                 usuario.getNombre(),
-                usuario.getRol()
-        );
+                usuario.getRol());
     }
 
     public Usuario registrar(RegistroRequest request) {
@@ -67,7 +65,11 @@ public class AuthenticationService {
         usuario.setNombre(request.getNombre());
         usuario.setCorreo(request.getCorreo());
         usuario.setContrasena(passwordEncoder.encode(request.getContrasena()));
-        usuario.setRol("USER");
+        // Usar el rol del request si se proporcionó, sino "USER" por defecto
+        String rol = (request.getRol() != null && !request.getRol().isEmpty())
+                ? request.getRol()
+                : "USER";
+        usuario.setRol(rol);
         usuario.setActivo(true);
 
         return usuarioRepository.save(usuario);
