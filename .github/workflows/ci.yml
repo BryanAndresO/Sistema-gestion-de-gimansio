@@ -17,7 +17,7 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: Configurar Java
+      - name: Configurar entorno Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
