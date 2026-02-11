@@ -18,10 +18,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Tests unitarios para EstadisticasService.
- * Persona 3 (Andres): métricas y agregaciones.
- */
+
 public class EstadisticasServiceTest {
 
     private ClaseRepository claseRepository;
@@ -48,7 +45,7 @@ public class EstadisticasServiceTest {
 
     @Test
     void obtenerEstadisticasGenerales_shouldFillTotals() {
-        // Arrange
+        // ===== ARRANGE: Preparar datos de prueba =====
         when(claseRepository.count()).thenReturn(10L);
         when(reservaRepository.count()).thenReturn(50L);
         when(reservaRepository.contarPorEstado("CONFIRMADA")).thenReturn(20L);
@@ -68,7 +65,7 @@ public class EstadisticasServiceTest {
         // Act
         EstadisticaDTO result = estadisticasService.obtenerEstadisticasGenerales();
 
-        // Assert
+        // ===== ASSERT: Verificar resultados y comportamientos =====
         assertEquals(10L, result.getTotalClases());
         assertEquals(50L, result.getTotalReservas());
         assertEquals(20L, result.getReservasConfirmadas());
@@ -87,7 +84,7 @@ public class EstadisticasServiceTest {
 
     @Test
     void obtenerEstadisticasGenerales_shouldBuildReservasPorClaseMap() {
-        // Arrange — preparar datos mínimos para totales
+        // ===== ARRANGE: Preparar datos mínimos para totales =====
         when(claseRepository.count()).thenReturn(3L);
         when(reservaRepository.count()).thenReturn(25L);
         when(reservaRepository.contarPorEstado(anyString())).thenReturn(0L);
@@ -101,10 +98,10 @@ public class EstadisticasServiceTest {
                 new Object[] { "CrossFit", 7L });
         when(reservaRepository.obtenerEstadisticasPorClase()).thenReturn(statsPorClase);
 
-        // Act
+        // ===== ACT: Ejecutar el método bajo prueba =====
         EstadisticaDTO result = estadisticasService.obtenerEstadisticasGenerales();
 
-        // Assert
+        // ===== ASSERT: Verificar el mapa de reservas por clase =====
         Map<String, Long> reservasPorClase = result.getReservasPorClase();
         assertNotNull(reservasPorClase);
         assertEquals(3, reservasPorClase.size());
@@ -117,7 +114,7 @@ public class EstadisticasServiceTest {
 
     @Test
     void obtenerEstadisticasGenerales_shouldBuildReservasPorMesMap() {
-        // Arrange — preparar datos mínimos para totales
+        // ===== ARRANGE: Preparar datos mínimos para totales =====
         when(claseRepository.count()).thenReturn(0L);
         when(reservaRepository.count()).thenReturn(0L);
         when(reservaRepository.contarPorEstado(anyString())).thenReturn(0L);
@@ -141,10 +138,10 @@ public class EstadisticasServiceTest {
         when(reservaRepository.buscarPorRangoFechas(any(), any()))
                 .thenReturn(List.of(r1, r2, r3));
 
-        // Act
+        // ===== ACT: Ejecutar el método bajo prueba =====
         EstadisticaDTO result = estadisticasService.obtenerEstadisticasGenerales();
 
-        // Assert
+        // ===== ASSERT: Verificar el mapa de reservas por mes =====
         Map<String, Long> reservasPorMes = result.getReservasPorMes();
         assertNotNull(reservasPorMes);
         assertEquals(2, reservasPorMes.size()); // 2 meses distintos
@@ -156,7 +153,7 @@ public class EstadisticasServiceTest {
 
     @Test
     void obtenerEstadisticasGenerales_whenNoData_shouldReturnZerosAndEmptyMaps() {
-        // Arrange — todo vacío / cero
+        // ===== ARRANGE: Todo vacío / cero =====
         when(claseRepository.count()).thenReturn(0L);
         when(reservaRepository.count()).thenReturn(0L);
         when(reservaRepository.contarPorEstado(anyString())).thenReturn(0L);
@@ -167,7 +164,7 @@ public class EstadisticasServiceTest {
         // Act
         EstadisticaDTO result = estadisticasService.obtenerEstadisticasGenerales();
 
-        // Assert
+        // ===== ASSERT: Verificar que todo sea cero y mapas vacíos =====
         assertEquals(0L, result.getTotalClases());
         assertEquals(0L, result.getTotalReservas());
         assertEquals(0L, result.getReservasConfirmadas());
@@ -188,7 +185,7 @@ public class EstadisticasServiceTest {
 
     @Test
     void obtenerEstadisticasPorPeriodo_shouldCountEstadosCorrectly() {
-        // Arrange
+        // ===== ARRANGE: Preparar período y reservas con distintos estados =====
         LocalDateTime inicio = LocalDateTime.of(2026, 1, 1, 0, 0);
         LocalDateTime fin = LocalDateTime.of(2026, 1, 31, 23, 59);
 
@@ -208,10 +205,10 @@ public class EstadisticasServiceTest {
         when(reservaRepository.buscarPorRangoFechas(inicio, fin))
                 .thenReturn(List.of(r1, r2, r3, r4, r5, r6));
 
-        // Act
+        // ===== ACT: Ejecutar el método bajo prueba =====
         EstadisticaDTO result = estadisticasService.obtenerEstadisticasPorPeriodo(inicio, fin);
 
-        // Assert
+        // ===== ASSERT: Verificar conteos por estado =====
         assertEquals(6L, result.getTotalReservas());
         assertEquals(2L, result.getReservasConfirmadas());
         assertEquals(1L, result.getReservasCanceladas());
@@ -222,17 +219,17 @@ public class EstadisticasServiceTest {
 
     @Test
     void obtenerEstadisticasPorPeriodo_whenEmpty_shouldReturnZeros() {
-        // Arrange
+        // ===== ARRANGE: Período sin reservas =====
         LocalDateTime inicio = LocalDateTime.of(2026, 6, 1, 0, 0);
         LocalDateTime fin = LocalDateTime.of(2026, 6, 30, 23, 59);
 
         when(reservaRepository.buscarPorRangoFechas(inicio, fin))
                 .thenReturn(Collections.emptyList());
 
-        // Act
+        // ===== ACT: Ejecutar el método bajo prueba =====
         EstadisticaDTO result = estadisticasService.obtenerEstadisticasPorPeriodo(inicio, fin);
 
-        // Assert
+        // ===== ASSERT: Verificar que todo sea cero =====
         assertEquals(0L, result.getTotalReservas());
         assertEquals(0L, result.getReservasConfirmadas());
         assertEquals(0L, result.getReservasCanceladas());
@@ -241,7 +238,7 @@ public class EstadisticasServiceTest {
 
     @Test
     void obtenerEstadisticasPorPeriodo_withSingleEstado_shouldCountOnlyThatEstado() {
-        // Arrange
+        // ===== ARRANGE: Solo reservas CANCELADAS =====
         LocalDateTime inicio = LocalDateTime.of(2026, 3, 1, 0, 0);
         LocalDateTime fin = LocalDateTime.of(2026, 3, 31, 23, 59);
 
@@ -253,10 +250,10 @@ public class EstadisticasServiceTest {
         when(reservaRepository.buscarPorRangoFechas(inicio, fin))
                 .thenReturn(List.of(r1, r2));
 
-        // Act
+        // ===== ACT: Ejecutar el método bajo prueba =====
         EstadisticaDTO result = estadisticasService.obtenerEstadisticasPorPeriodo(inicio, fin);
 
-        // Assert
+        // ===== ASSERT: Solo canceladas, otras en cero =====
         assertEquals(2L, result.getTotalReservas());
         assertEquals(0L, result.getReservasConfirmadas());
         assertEquals(2L, result.getReservasCanceladas());
@@ -265,7 +262,7 @@ public class EstadisticasServiceTest {
 
     @Test
     void obtenerEstadisticasPorPeriodo_shouldSetTotalReservasAsListSize() {
-        // Arrange
+        // ===== ARRANGE: Lista específica de reservas =====
         LocalDateTime inicio = LocalDateTime.of(2026, 2, 1, 0, 0);
         LocalDateTime fin = LocalDateTime.of(2026, 2, 28, 23, 59);
 
@@ -282,10 +279,10 @@ public class EstadisticasServiceTest {
         when(reservaRepository.buscarPorRangoFechas(inicio, fin))
                 .thenReturn(reservas);
 
-        // Act
+        // ===== ACT: Ejecutar el método bajo prueba =====
         EstadisticaDTO result = estadisticasService.obtenerEstadisticasPorPeriodo(inicio, fin);
 
-        // Assert — totalReservas debe ser el tamaño de la lista
+        // ===== ASSERT: totalReservas debe ser el tamaño de la lista =====
         assertEquals((long) reservas.size(), result.getTotalReservas());
         assertEquals(4L, result.getTotalReservas());
     }

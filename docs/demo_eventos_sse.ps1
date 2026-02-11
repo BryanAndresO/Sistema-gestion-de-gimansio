@@ -9,6 +9,15 @@
 
 $BASE_URL = "https://sistema-gestion-de-gimansio.onrender.com/api/recomendaciones/simular"
 
+# Mapa de IDs a nombres de clases
+$CLASES = @{
+    "1" = "Yoga Matutino"
+    "2" = "CrossFit Intenso"
+    "3" = "Spinning Nocturno"
+    "4" = "Pilates Avanzado"
+    "5" = "Zumba Fitness"
+}
+
 # Colores para la consola
 function Write-Header($text) {
     Write-Host ""
@@ -20,10 +29,13 @@ function Write-Header($text) {
 
 function Write-Event($tipo, $claseId, $color) {
     $timestamp = Get-Date -Format "HH:mm:ss.fff"
+    $nombreClase = $CLASES[$claseId]
     Write-Host "  [$timestamp] " -ForegroundColor DarkGray -NoNewline
     Write-Host "EVENTO >> " -ForegroundColor $color -NoNewline
     Write-Host "$tipo" -ForegroundColor $color -NoNewline
-    Write-Host " (claseId: $claseId)" -ForegroundColor Gray
+    Write-Host " | Clase: " -ForegroundColor Gray -NoNewline
+    Write-Host "$nombreClase" -ForegroundColor White -NoNewline
+    Write-Host " (ID: $claseId)" -ForegroundColor DarkGray
 }
 
 function Write-FluxInfo($text) {
@@ -39,8 +51,15 @@ function Send-Evento($claseId, $tipo, $color) {
     } | ConvertTo-Json
 
     try {
-        Invoke-RestMethod -Uri $BASE_URL -Method POST -ContentType "application/json" -Body $body -ErrorAction Stop
+        $response = Invoke-RestMethod -Uri $BASE_URL -Method POST -ContentType "application/json" -Body $body -ErrorAction Stop
         Write-Event $tipo $claseId $color
+        
+        # Mostrar respuesta del servidor si tiene información adicional
+        if ($response.status) {
+            Write-Host "           " -NoNewline
+            Write-Host "Server: " -ForegroundColor DarkCyan -NoNewline
+            Write-Host "$($response.status) - $($response.timestamp)" -ForegroundColor DarkGray
+        }
     }
     catch {
         Write-Host "  ERROR: $($_.Exception.Message)" -ForegroundColor Red
@@ -85,34 +104,34 @@ Write-Host ""
 
 Start-Sleep -Seconds 1
 
-Write-Host "  [1/5] Simulando: Un cupo se libero en Yoga..." -ForegroundColor White
+Write-Host "  [1/5] Simulando: Un cupo se liberó en Yoga..." -ForegroundColor White
 Send-Evento "1" "CUPO_DISPONIBLE" "Green"
 Write-FluxInfo "filter() -> flatMap(Mono.fromCallable(claseRepo.findById)) -> onNext"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 5
 
 Write-Host ""
-Write-Host "  [2/5] Simulando: CrossFit esta lleno..." -ForegroundColor White
+Write-Host "  [2/5] Simulando: CrossFit está lleno..." -ForegroundColor White
 Send-Evento "2" "CLASE_LLENA" "Red"
 Write-FluxInfo "filter() -> flatMap(buscar 'CrossFit Intenso') -> onBackpressureLatest()"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 5
 
 Write-Host ""
 Write-Host "  [3/5] Simulando: Cambio de horario en Spinning..." -ForegroundColor White
 Send-Evento "3" "CAMBIO_HORARIO" "Yellow"
 Write-FluxInfo "filter() -> flatMap(buscar 'Spinning Nocturno') -> distinct(claseId)"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 5
 
 Write-Host ""
 Write-Host "  [4/5] Simulando: Nueva reserva en Yoga..." -ForegroundColor White
 Send-Evento "1" "RESERVA_CREADA" "Cyan"
 Write-FluxInfo "filter() -> flatMap(Mono.just(RecomendacionDTO)) -> mergeWith(heartbeat)"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 5
 
 Write-Host ""
 Write-Host "  [5/5] Simulando: Reserva cancelada en CrossFit..." -ForegroundColor White
 Send-Evento "2" "RESERVA_CANCELADA" "Magenta"
 Write-FluxInfo "filter() -> flatMap() -> Schedulers.boundedElastic() -> onNext"
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 4
 
 # ---- FASE 2: Ráfaga de eventos ----
 Write-Header "FASE 2: Rafaga de Eventos (Backpressure Demo)"
@@ -133,7 +152,7 @@ $rafaga = @(
 
 foreach ($ev in $rafaga) {
     Send-Evento $ev.claseId $ev.tipo $ev.color
-    Start-Sleep -Milliseconds 500
+    Start-Sleep -Milliseconds 800
 }
 
 Write-FluxInfo "onBackpressureLatest() maneja la rafaga sin bloquear el subscriber"
@@ -162,7 +181,7 @@ for ($i = 1; $i -le 10; $i++) {
     Write-Host "  [$i/10] " -ForegroundColor DarkGray -NoNewline
     Send-Evento "$claseId" $eventoRandom.tipo $eventoRandom.color
     
-    $pausa = Get-Random -Minimum 2 -Maximum 5
+    $pausa = Get-Random -Minimum 3 -Maximum 6
     Start-Sleep -Seconds $pausa
 }
 

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux; // Importa Flux de Project Reactor para manejo de flujos reactivos.
 import java.time.Duration; // Importa Duration para el heartbeat
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/recomendaciones") // Define el prefijo de la URL para este controlador.
@@ -79,7 +80,7 @@ public class RecomendacionStreamController {
      * @param request Objeto EmitirEventoRequest que contiene la claseId y el tipo de evento a simular.
      */
     @PostMapping("/simular")
-    public void simularEvento(@RequestBody EmitirEventoRequest request) {
+    public Map<String, String> simularEvento(@RequestBody EmitirEventoRequest request) {
 
         // Crea un objeto EventoGym a partir de los datos de la solicitud.
         EventoGym evento = new EventoGym(
@@ -89,5 +90,13 @@ public class RecomendacionStreamController {
 
         // Emite el evento simulado a través del servicio de eventos.
         eventoGymService.emitirEvento(evento);
+        
+        // Retorna información detallada del evento emitido
+        return Map.of(
+            "status", "emitido",
+            "claseId", request.getClaseId(),
+            "tipo", request.getTipo().toString(),
+            "timestamp", LocalDateTime.now().toString()
+        );
     }
 }
