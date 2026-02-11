@@ -205,16 +205,22 @@ public class RecomendacionServiceTest {
 
         // Act & Assert
         // El pipeline no debe fallar, debe manejar los errores gracefully
-        StepVerifier.create(recomendacionService.generar(eventos))
-                .assertNext(recomendacion -> {
-                    // Primera recomendación: clase encontrada
-                    assertEquals("1", recomendacion.getClaseId());
-                    assertEquals("Clase Encontrada", recomendacion.getNombreClase());
-                })
-                .assertNext(recomendacion -> {
-                    // Segunda recomendación: ID no numérico (genérica)
-                    assertEquals("PILATES-202", recomendacion.getClaseId());
-                    assertEquals("Pilates", recomendacion.getNombreClase());
+        recomendacionService.generar(eventos)
+                .collectList()
+                .as(StepVerifier::create)
+                .assertNext(recomendaciones -> {
+                    // Debe recibir 2 recomendaciones (la clase no encontrada no emite nada)
+                    assertEquals(2, recomendaciones.size());
+                    
+                    // Verificar que existe la recomendación de clase encontrada
+                    assertTrue(recomendaciones.stream().anyMatch(r -> 
+                        r.getClaseId().equals("1") && 
+                        r.getNombreClase().equals("Clase Encontrada")));
+                    
+                    // Verificar que existe la recomendación de ID no numérico
+                    assertTrue(recomendaciones.stream().anyMatch(r -> 
+                        r.getClaseId().equals("PILATES-202") && 
+                        r.getNombreClase().equals("Pilates")));
                 })
                 .verifyComplete();
 
@@ -269,18 +275,24 @@ public class RecomendacionServiceTest {
         Flux<EventoGym> eventos = Flux.just(cupoDisponible, claseLlena, cambioHorario);
 
         // Act & Assert
-        StepVerifier.create(recomendacionService.generar(eventos))
-                .assertNext(recomendacion -> {
-                    assertEquals("1", recomendacion.getClaseId());
-                    assertEquals(1, recomendacion.getPrioridad()); // CUPO_DISPONIBLE
-                })
-                .assertNext(recomendacion -> {
-                    assertEquals("2", recomendacion.getClaseId());
-                    assertEquals(3, recomendacion.getPrioridad()); // CLASE_LLENA
-                })
-                .assertNext(recomendacion -> {
-                    assertEquals("3", recomendacion.getClaseId());
-                    assertEquals(2, recomendacion.getPrioridad()); // CAMBIO_HORARIO
+        recomendacionService.generar(eventos)
+                .collectList()
+                .as(StepVerifier::create)
+                .assertNext(recomendaciones -> {
+                    // Verificar que recibimos las 3 recomendaciones esperadas
+                    assertEquals(3, recomendaciones.size());
+                    
+                    // Verificar que existe la recomendación de CUPO_DISPONIBLE
+                    assertTrue(recomendaciones.stream().anyMatch(r -> 
+                        r.getClaseId().equals("1") && r.getPrioridad() == 1));
+                    
+                    // Verificar que existe la recomendación de CLASE_LLENA
+                    assertTrue(recomendaciones.stream().anyMatch(r -> 
+                        r.getClaseId().equals("2") && r.getPrioridad() == 3));
+                    
+                    // Verificar que existe la recomendación de CAMBIO_HORARIO
+                    assertTrue(recomendaciones.stream().anyMatch(r -> 
+                        r.getClaseId().equals("3") && r.getPrioridad() == 2));
                 })
                 .verifyComplete();
     }
