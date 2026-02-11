@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux; // Importa Flux de Project Reactor para manejo de flujos reactivos.
 import java.time.Duration; // Importa Duration para el heartbeat
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/recomendaciones") // Define el prefijo de la URL para este controlador.
@@ -27,7 +28,7 @@ public class RecomendacionStreamController {
     /**
      * Endpoint SSE (Server-Sent Events) para transmitir recomendaciones en tiempo real.
      * Este método produce un stream de eventos de texto (`MediaType.TEXT_EVENT_STREAM_VALUE`).
-     * Incluye un heartbeat cada 30 segundos para mantener la conexión activa.
+     * Incluye un heartbeat cada 30 segundos para mantener la conexión activa y evitar desconexiones.
      *
      * @return Un Flux de RecomendacionDTO que se enviará al cliente.
      */
@@ -41,7 +42,22 @@ public class RecomendacionStreamController {
                 eventoGymService.flujoEventos()
         );
         
+        // Heartbeat cada 30 segundos para mantener la conexión activa
+        Flux<RecomendacionDTO> heartbeat = Flux.interval(Duration.ofSeconds(30))
+                .map(tick -> {
+                    System.out.println("Enviando heartbeat SSE");
+                    return new RecomendacionDTO(
+                            "heartbeat", 
+                            "heartbeat", 
+                            "keep-alive", 
+                            4, 
+                            LocalDateTime.now()
+                    );
+                })
+                .doOnNext(hb -> System.out.println("Heartbeat enviado: " + hb.getTimestamp()));
+        
         return recomendaciones
+                .mergeWith(heartbeat) // Combina recomendaciones con heartbeat
                 .doOnSubscribe(subscription -> {
                     System.out.println("Cliente suscrito al stream SSE");
                 })
@@ -50,6 +66,9 @@ public class RecomendacionStreamController {
                 })
                 .doOnError(e -> {
                     System.err.println("ERROR en stream SSE: " + e.getMessage());
+                })
+                .doOnCancel(() -> {
+                    System.out.println("Cliente canceló la suscripción SSE");
                 });
     }
 

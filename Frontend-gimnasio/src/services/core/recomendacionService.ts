@@ -13,6 +13,13 @@ export interface RecomendacionDTO {
   timestamp: string;
 }
 
+// Función para detectar si un mensaje es heartbeat
+export const esHeartbeat = (recomendacion: RecomendacionDTO): boolean => {
+  return recomendacion.claseId === 'heartbeat' && 
+         recomendacion.nombreClase === 'heartbeat' && 
+         recomendacion.mensaje === 'keep-alive';
+};
+
 export interface ConectarRecomendacionesOptions {
   onMensaje: (recomendacion: RecomendacionDTO) => void;
   onError?: (error: Event) => void;
@@ -94,6 +101,12 @@ export const conectarRecomendaciones = (
       // El backend ahora envía RecomendacionDTO directamente
       const recomendacion: RecomendacionDTO = JSON.parse(event.data);
       
+      // Ignorar heartbeats pero loggearlos para debugging
+      if (esHeartbeat(recomendacion)) {
+        console.log('Heartbeat recibido:', recomendacion.timestamp);
+        return; // No procesar heartbeats como recomendaciones
+      }
+      
       // Normalizar el timestamp si viene en formato array
       if (recomendacion.timestamp) {
         recomendacion.timestamp = convertirTimestamp(recomendacion.timestamp);
@@ -101,6 +114,7 @@ export const conectarRecomendaciones = (
         recomendacion.timestamp = new Date().toISOString();
       }
       
+      console.log('Recomendación recibida:', recomendacion);
       onMensaje(recomendacion);
     } catch (error) {
       console.error('Error al parsear mensaje SSE:', error);
@@ -111,15 +125,16 @@ export const conectarRecomendaciones = (
   // Manejar errores
   eventSource.onerror = (error: Event) => {
     console.error('Error en conexión SSE:', error);
+    console.log('Estado EventSource:', eventSource.readyState);
+    
     if (onError) {
       onError(error);
     }
     
-    // Si el estado es CLOSED, intentar reconectar después de un delay
+    // Si el estado es CLOSED, intentar reconectar automáticamente después de un delay
     if (eventSource.readyState === EventSource.CLOSED) {
-      console.log('Conexión SSE cerrada. Intentando reconectar...');
-      // El EventSource puede intentar reconectar automáticamente
-      // pero si queremos control manual, cerramos y dejamos que el hook maneje la reconexión
+      console.log('Conexión SSE cerrada. El navegador intentará reconectar automáticamente...');
+      // EventSource tiene reconexión automática, pero podemos agregar lógica adicional si es necesario
     }
   };
 

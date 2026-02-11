@@ -2,11 +2,13 @@ package com.gimansioreserva.gimnasioreserva_spring.service.core;
 
 import com.gimansioreserva.gimnasioreserva_spring.domain.EventoGym;
 import com.gimansioreserva.gimnasioreserva_spring.domain.TipoEvento;
+import com.gimansioreserva.gimnasioreserva_spring.domain.Clase;
 import com.gimansioreserva.gimnasioreserva_spring.dto.core.RecomendacionDTO;
 import com.gimansioreserva.gimnasioreserva_spring.repository.ClaseRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux; // Importa Flux para flujos de datos reactivos.
 import reactor.core.publisher.Mono; // Importa Mono para datos reactivos de 0 o 1 elemento.
+import reactor.core.scheduler.Schedulers;
 
 @Service // Indica que esta clase es un componente de servicio de Spring.
 public class RecomendacionService {
@@ -38,18 +40,33 @@ public class RecomendacionService {
                 // 2. flatMap: Transforma cada evento filtrado en una RecomendacionDTO.
                 //    Se utiliza flatMap para realizar una operación asíncrona (buscar la clase por ID)
                 //    y aplanar los Mono resultantes en un único Flux.
+                //    Envuelve operaciones bloqueantes de BD en un thread pool dedicado para mantener el flujo reactivo.
                 .flatMap(evento -> {
                     try {
                         // Intenta parsear claseId a Long y buscar la clase
                         Long idClase = Long.parseLong(evento.getClaseId());
-                        return Mono.justOrEmpty(claseRepository.findById(idClase))
-                                .map(clase -> new RecomendacionDTO(
-                                        evento.getClaseId(),
-                                        clase.getNombre(),
-                                        generarMensaje(evento, clase.getNombre()),
-                                        generarPrioridad(evento.getTipo()),
-                                        evento.getTimestamp()
-                                ));
+                        
+                        // Envolver la llamada bloqueante a BD en un Mono.fromCallable
+                        // y ejecutarla en un thread pool separado para no bloquear el flujo reactivo
+                        return Mono.fromCallable(() -> claseRepository.findById(idClase))
+                                .subscribeOn(Schedulers.boundedElastic()) // Thread pool para operaciones bloqueantes
+                                .flatMap(optionalClase -> {
+                                    if (optionalClase.isPresent()) {
+                                        Clase clase = optionalClase.get();
+                                        return Mono.just(new RecomendacionDTO(
+                                                evento.getClaseId(),
+                                                clase.getNombre(),
+                                                generarMensaje(evento, clase.getNombre()),
+                                                generarPrioridad(evento.getTipo()),
+                                                evento.getTimestamp()
+                                        ));
+                                    } else {
+                                        System.out.println("Clase no encontrada en BD: " + idClase);
+                                        return Mono.empty(); // No emitir nada si la clase no existe
+                                    }
+                                })
+                                .doOnError(e -> System.err.println("Error buscando clase " + idClase + ": " + e.getMessage()))
+                                .onErrorResume(e -> Mono.empty()); // Continuar el flujo si hay error
                     } catch (NumberFormatException e) {
                         // Si claseId no es un número válido, crear recomendación genérica
                         System.out.println("claseId no numérico, creando recomendación genérica: " + evento.getClaseId());
