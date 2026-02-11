@@ -27,7 +27,7 @@ jobs:
         working-directory: ./gimnasioreserva-spring
         run: chmod +x gradlew
 
-      - name: Ejecutar las pruebas
+      - name: Ejecutar suite de pruebas
         working-directory: ./gimnasioreserva-spring
         run: ./gradlew test
 
