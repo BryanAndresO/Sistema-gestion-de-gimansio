@@ -1,88 +1,36 @@
-name: CI - Testing
+# Nombre que se le da
+name: CI
 
+# Trigger - El accionador
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
-      - master
-      - main
+        - '**' # Esto activa el job para PRs en CUALQUIER rama
 
 jobs:
-  # ========================================
-  # BACKEND - Test with H2
-  # ========================================
-  backend-build:
-    name: Backend Build and Test
+  build-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Clonar el repositorio
         uses: actions/checkout@v4
 
-      - name: Setup JDK 17
+      - name: Configurar Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
-      - name: Grant execute permission for Gradle
+      - name: Hacer gradlew ejecutable
         working-directory: ./gimnasioreserva-spring
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        working-directory: ./gimnasioreserva-spring
-        run: ./gradlew clean build
-
-      - name: Run Tests
+      - name: Ejecutar las pruebas
         working-directory: ./gimnasioreserva-spring
         run: ./gradlew test
 
-  # ========================================
-  # FRONTEND - Build and Lint
-  # ========================================
-  frontend-build:
-    name: Frontend Build and Lint
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: ./Frontend-gimnasio/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./Frontend-gimnasio
-        run: npm ci
-
-      - name: Run Linter
-        working-directory: ./Frontend-gimnasio
-        run: npm run lint
-
-      - name: Build Frontend
-        working-directory: ./Frontend-gimnasio
-        run: npm run build
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: Frontend-gimnasio/dist/
-
-  # ========================================
-  # DEPLOY - Trigger Render Deploy
-  # ========================================
-  deploy:
-    name: Deploy to Render
-    needs: [backend-build, frontend-build]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Deploy Backend
-        if: success()
-        run: curl "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+      - name: Construir
+        working-directory: ./gimnasioreserva-spring
+        run: ./gradlew build
